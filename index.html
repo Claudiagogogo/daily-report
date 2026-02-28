@@ -8,115 +8,542 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f5f5f5;
             min-height: 100vh;
+        }
+        .header {
+            background: white;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 { font-size: 20px; color: #333; }
+        .stats {
+            display: flex;
+            gap: 20px;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-value { font-size: 24px; font-weight: bold; color: #1890ff; }
+        .stat-label { font-size: 12px; color: #666; }
+        
+        .nav {
+            background: white;
+            border-bottom: 1px solid #e8e8e8;
+            display: flex;
+            padding: 0 20px;
+        }
+        .nav-item {
+            padding: 15px 20px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            color: #666;
+        }
+        .nav-item.active {
+            color: #1890ff;
+            border-bottom-color: #1890ff;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
             padding: 20px;
         }
-        .container { max-width: 800px; margin: 0 auto; }
-        .header { 
-            background: rgba(255,255,255,0.95); 
-            padding: 30px; 
-            border-radius: 20px; 
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        /* 日报样式 */
+        .daily-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
         }
-        h1 { color: #333; margin-bottom: 20px; }
-        .date-selector { 
-            display: flex; 
-            gap: 10px; 
-            align-items: center; 
+        .section-title {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .recent-days {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .day-card {
+            padding: 10px 15px;
+            border: 1px solid #e8e8e8;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+            min-width: 80px;
+        }
+        .day-card:hover { background: #f5f5f5; }
+        .day-card.active {
+            background: #1890ff;
+            color: white;
+            border-color: #1890ff;
+        }
+        .day-card.has-data {
+            border-color: #52c41a;
+            border-width: 2px;
+        }
+        .day-name { font-size: 12px; margin-bottom: 4px; }
+        .day-date { font-size: 14px; font-weight: bold; }
+        .day-info { font-size: 11px; margin-top: 4px; opacity: 0.8; }
+        
+        .date-selector {
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        input[type="date"] {
+            padding: 8px 12px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .report-display {
+            background: #fafafa;
+            border: 1px solid #e8e8e8;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .report-title { font-size: 18px; color: #333; }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        .empty-state p { margin: 10px 0; }
+        
+        .work-item {
+            background: white;
+            border: 1px solid #e8e8e8;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .work-item-content { flex: 1; }
+        .work-item-text { font-size: 14px; color: #333; margin-bottom: 5px; }
+        .work-item-meta { display: flex; gap: 10px; align-items: center; }
+        .category-tag {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: white;
+        }
+        .progress-bar {
+            width: 100px;
+            height: 6px;
+            background: #f0f0f0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #52c41a;
+            border-radius: 3px;
+        }
+        .progress-text { font-size: 12px; color: #666; margin-left: 5px; }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .btn-primary {
+            background: #1890ff;
+            color: white;
+        }
+        .btn-primary:hover { background: #40a9ff; }
+        .btn-default {
+            background: white;
+            border: 1px solid #d9d9d9;
+            color: #333;
+        }
+        .btn-default:hover { border-color: #1890ff; color: #1890ff; }
+        .btn-danger {
+            background: #ff4d4f;
+            color: white;
+        }
+        .btn-sm { padding: 4px 12px; font-size: 12px; }
+        
+        .edit-area { margin-top: 20px; }
+        .work-input-row {
+            background: #f8f9fa;
+            border: 1px solid #e8e8e8;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+        .input-group { margin-bottom: 10px; }
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        input[type="text"], select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        input[type="range"] { flex: 1; }
+        .slider-value { min-width: 40px; text-align: right; }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow: auto;
+        }
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #e8e8e8;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-body { padding: 20px; }
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid #e8e8e8;
+            text-align: right;
+        }
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #999;
+        }
+        
+        .category-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .category-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: #f5f5f5;
+            border-radius: 6px;
+            border: 2px solid transparent;
+        }
+        .category-item.editing {
+            border-color: #1890ff;
+            background: #e6f7ff;
+        }
+        .color-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .category-input {
+            border: none;
+            background: transparent;
+            padding: 4px;
+            font-size: 14px;
+            width: 100px;
+        }
+        .category-actions {
+            display: flex;
+            gap: 5px;
+        }
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            color: #666;
+        }
+        .icon-btn:hover { color: #1890ff; }
+        
+        .color-picker {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .color-option {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .color-option:hover { transform: scale(1.2); }
+        .color-option.selected { border-color: #333; }
+        
+        /* 周报月报样式 */
+        .report-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .ai-summary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .ai-summary h3 { margin-bottom: 10px; }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .summary-item {
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 6px;
+        }
+        .summary-label { font-size: 12px; opacity: 0.9; }
+        .summary-value { font-size: 20px; font-weight: bold; margin-top: 5px; }
+        
+        .distribution-bar {
+            display: flex;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .distribution-segment {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .work-summary-list {
+            margin-top: 20px;
+        }
+        .summary-category {
+            margin-bottom: 15px;
+            border: 1px solid #e8e8e8;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .summary-category-header {
+            padding: 12px 15px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        .summary-category-content {
+            padding: 15px;
+            background: #fafafa;
+        }
+        .summary-item-text {
+            padding: 8px 0;
+            border-bottom: 1px dashed #e8e8e8;
+            font-size: 14px;
+        }
+        .summary-item-text:last-child { border-bottom: none; }
+        
+        .week-selector, .month-selector {
+            display: flex;
+            gap: 10px;
             margin-bottom: 20px;
             flex-wrap: wrap;
         }
-        input[type="date"] { 
-            padding: 10px 15px; 
-            border: 2px solid #e0e0e0; 
-            border-radius: 10px; 
-            font-size: 16px;
+        .week-card, .month-card {
+            padding: 10px 15px;
+            border: 1px solid #e8e8e8;
+            border-radius: 6px;
+            cursor: pointer;
         }
-        button { 
-            padding: 10px 20px; 
-            border: none; 
-            border-radius: 10px; 
-            cursor: pointer; 
-            font-size: 16px;
-            transition: all 0.3s;
+        .week-card:hover, .month-card:hover { background: #f5f5f5; }
+        .week-card.active, .month-card.active {
+            background: #1890ff;
+            color: white;
+            border-color: #1890ff;
         }
-        .btn-primary { background: #667eea; color: white; }
-        .btn-primary:hover { background: #5568d3; transform: translateY(-2px); }
-        .btn-secondary { background: #f0f0f0; color: #333; margin-left: 5px; }
-        .btn-secondary:hover { background: #e0e0e0; }
-        
-        .content-area { 
-            background: rgba(255,255,255,0.95); 
-            padding: 30px; 
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-        }
-        textarea { 
-            width: 100%; 
-            min-height: 300px; 
-            padding: 20px; 
-            border: 2px solid #e0e0e0; 
-            border-radius: 15px; 
-            font-size: 16px;
-            line-height: 1.6;
-            resize: vertical;
-            font-family: inherit;
-        }
-        textarea:focus { outline: none; border-color: #667eea; }
         
         .status { 
-            margin-top: 15px; 
-            padding: 15px; 
-            border-radius: 10px; 
+            padding: 10px 15px; 
+            border-radius: 4px; 
+            margin: 10px 0;
             display: none;
         }
-        .status.success { background: #d4edda; color: #155724; display: block; }
-        .status.error { background: #f8d7da; color: #721c24; display: block; }
-        .status.loading { background: #fff3cd; color: #856404; display: block; }
-        
-        .recent-list { margin-top: 20px; }
-        .recent-item { 
-            padding: 15px; 
-            background: #f8f9fa; 
-            border-radius: 10px; 
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .recent-item:hover { background: #e9ecef; transform: translateX(5px); }
-        .recent-date { font-weight: bold; color: #667eea; }
-        .recent-preview { color: #666; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .status.success { background: #f6ffed; border: 1px solid #b7eb8f; color: #52c41a; display: block; }
+        .status.error { background: #fff2f0; border: 1px solid #ffccc7; color: #ff4d4f; display: block; }
+        .status.loading { background: #e6f7ff; border: 1px solid #91d5ff; color: #1890ff; display: block; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>📋 工作日报管理系统</h1>
-            <div class="date-selector">
-                <label>选择日期：</label>
-                <input type="date" id="datePicker">
-                <button class="btn-primary" onclick="loadReport()">📖 读取</button>
-                <button class="btn-primary" onclick="saveReport()">💾 保存</button>
-                <button class="btn-secondary" onclick="loadRecent()">📅 最近7天</button>
+    <div class="header">
+        <h1>📋 工作日报管理系统</h1>
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="statMonth">0</div>
+                <div class="stat-label">本月记录</div>
             </div>
-            <div id="status" class="status"></div>
+            <div class="stat-card">
+                <div class="stat-value" id="statWeek">0</div>
+                <div class="stat-label">本周记录</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statAvg">0%</div>
+                <div class="stat-label">平均完成度</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statTotal">0</div>
+                <div class="stat-label">总记录数</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="nav">
+        <div class="nav-item active" onclick="switchTab('daily')">日报</div>
+        <div class="nav-item" onclick="switchTab('weekly')">周报</div>
+        <div class="nav-item" onclick="switchTab('monthly')">月报</div>
+        <div style="flex: 1;"></div>
+        <div class="nav-item" onclick="openCategoryModal()">⚙️ 分类管理</div>
+    </div>
+    
+    <div class="container">
+        <!-- 日报标签 -->
+        <div id="tab-daily" class="tab-content active">
+            <div class="daily-section">
+                <div class="section-title">最近7天</div>
+                <div class="recent-days" id="recentDays"></div>
+            </div>
+            
+            <div class="daily-section">
+                <div class="date-selector">
+                    <label>选择日期：</label>
+                    <input type="date" id="datePicker">
+                </div>
+                
+                <div class="report-display" id="reportDisplay">
+                    <div class="report-header">
+                        <div class="report-title" id="reportTitle">2026-02-28 的工作日报</div>
+                        <div id="reportActions"></div>
+                    </div>
+                    <div id="reportContent"></div>
+                </div>
+                
+                <div id="editArea" style="display: none;">
+                    <div id="workInputs"></div>
+                    <button class="btn btn-default" onclick="addWorkInput()" style="margin: 10px 0;">
+                        + 添加工作项
+                    </button>
+                    <div style="margin-top: 15px;">
+                        <button class="btn btn-primary" onclick="saveReport()">保存</button>
+                        <button class="btn btn-default" onclick="cancelEdit()">取消</button>
+                    </div>
+                </div>
+                
+                <div id="dailyStatus" class="status"></div>
+            </div>
         </div>
         
-        <div class="content-area">
-            <textarea id="reportContent" placeholder="在此输入您的工作日报内容...&#10;&#10;例如：&#10;1. 今日完成工作：&#10;2. 明日计划：&#10;3. 遇到的问题："></textarea>
-            
-            <div id="recentList" class="recent-list" style="display:none;">
-                <h3 style="margin-bottom: 15px; color: #333;">最近7天记录</h3>
-                <div id="recentItems"></div>
+        <!-- 周报标签 -->
+        <div id="tab-weekly" class="tab-content">
+            <div class="report-section">
+                <div class="section-title">选择周</div>
+                <div class="week-selector" id="weekSelector"></div>
+                <button class="btn btn-primary" onclick="generateWeeklyReport()">生成周报</button>
+            </div>
+            <div id="weeklyReport"></div>
+        </div>
+        
+        <!-- 月报标签 -->
+        <div id="tab-monthly" class="tab-content">
+            <div class="report-section">
+                <div class="section-title">选择月份</div>
+                <div class="month-selector" id="monthSelector"></div>
+                <button class="btn btn-primary" onclick="generateMonthlyReport()">生成月报</button>
+            </div>
+            <div id="monthlyReport"></div>
+        </div>
+    </div>
+    
+    <!-- 分类管理弹窗 -->
+    <div class="modal" id="categoryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>分类管理</h3>
+                <button class="close-btn" onclick="closeCategoryModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="category-list" id="categoryList"></div>
+                <div style="border-top: 1px solid #e8e8e8; padding-top: 15px;">
+                    <label>添加新分类</label>
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <input type="text" id="newCategoryName" placeholder="分类名称" style="flex: 1;">
+                        <div class="color-picker" id="newCategoryColors"></div>
+                        <button class="btn btn-primary" onclick="addCategory()">添加</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" onclick="resetCategories()">重置默认</button>
+                <button class="btn btn-primary" onclick="closeCategoryModal()">完成</button>
             </div>
         </div>
     </div>
 
     <script>
         // ============================================
-        // 飞书应用配置（已填写您的参数）
+        // 配置
         // ============================================
         const CONFIG = {
             appId: 'cli_a9283165da391bd8',
@@ -125,314 +552,812 @@
             tableId: 'tblhtlSIXhqkOy3A'
         };
         
-        // 飞书API基础地址
         const FEISHU_API = 'https://open.feishu.cn/open-apis';
-        
-        // 存储token（实际项目中应妥善保管）
         let accessToken = null;
         let tokenExpireTime = 0;
+        let currentDate = new Date().toISOString().split('T')[0];
+        let editingData = null;
+        let selectedColor = '#1890ff';
         
-        // 初始化日期选择器为今天
-        document.getElementById('datePicker').valueAsDate = new Date();
+        // 默认分类
+        let categories = [
+            { id: 'dev', name: '开发工作', color: '#1890ff' },
+            { id: 'design', name: '设计工作', color: '#eb2f96' },
+            { id: 'meeting', name: '会议沟通', color: '#faad14' },
+            { id: 'doc', name: '文档整理', color: '#52c41a' },
+            { id: 'research', name: '调研分析', color: '#722ed1' },
+            { id: 'deploy', name: '部署运维', color: '#fa541c' },
+            { id: 'other', name: '其他', color: '#999999' }
+        ];
         
-        // 显示状态消息
-        function showStatus(message, type) {
-            const status = document.getElementById('status');
-            status.textContent = message;
-            status.className = `status ${type}`;
-            if (type !== 'loading') {
-                setTimeout(() => status.style.display = 'none', 3000);
-            }
-        }
+        const colorOptions = [
+            '#1890ff', '#eb2f96', '#faad14', '#52c41a', '#722ed1', '#fa541c',
+            '#13c2c2', '#2f54eb', '#f5222d', '#a0d911', '#fa8c16', '#597ef7',
+            '#9254de', '#36cfc9', '#bfbfbf'
+        ];
         
-        // 获取飞书访问token（tenant_access_token）
-        async function getAccessToken() {
-            // 如果token未过期，直接返回
-            if (accessToken && Date.now() < tokenExpireTime) {
+        // ============================================
+        // 初始化
+        // ============================================
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('datePicker').value = currentDate;
+            generateRecentDays();
+            generateWeekSelector();
+            generateMonthSelector();
+            renderCategoryColors();
+            loadCategories().then(() => {
+                loadReport();
+                updateStats();
+            });
+        });
+        
+        // ============================================
+        // 飞书API
+        // ============================================
+        async function getToken() {
+            if (accessToken && Date.now() < tokenExpireTime) return accessToken;
+            
+            const res = await fetch(`${FEISHU_API}/auth/v3/tenant_access_token/internal`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ app_id: CONFIG.appId, app_secret: CONFIG.appSecret })
+            });
+            const data = await res.json();
+            if (data.code === 0) {
+                accessToken = data.tenant_access_token;
+                tokenExpireTime = Date.now() + (data.expire * 1000) - (30 * 60 * 1000);
                 return accessToken;
             }
+            throw new Error(data.msg);
+        }
+        
+        // 从飞书加载分类（存储在单独的表中或使用字段）
+        async function loadCategories() {
+            // 这里简化处理，实际可以存储在飞书另一个表中
+            // 暂时使用内存中的分类
+            return categories;
+        }
+        
+        // ============================================
+        // 日报功能
+        // ============================================
+        function generateRecentDays() {
+            const container = document.getElementById('recentDays');
+            const today = new Date();
+            
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(today.getDate() - i);
+                const dateStr = date.toISOString().split('T')[0];
+                const dayName = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][date.getDay()];
+                
+                const card = document.createElement('div');
+                card.className = 'day-card';
+                card.id = `day-${dateStr}`;
+                card.innerHTML = `
+                    <div class="day-name">${i === 0 ? '今天' : i === 1 ? '昨天' : dayName}</div>
+                    <div class="day-date">${date.getMonth() + 1}/${date.getDate()}</div>
+                    <div class="day-info" id="day-info-${dateStr}"></div>
+                `;
+                card.onclick = () => selectDate(dateStr);
+                container.appendChild(card);
+            }
+        }
+        
+        function selectDate(date) {
+            currentDate = date;
+            document.getElementById('datePicker').value = date;
+            document.querySelectorAll('.day-card').forEach(card => {
+                card.classList.toggle('active', card.id === `day-${date}`);
+            });
+            loadReport();
+        }
+        
+        async function loadReport() {
+            document.getElementById('reportTitle').textContent = `${currentDate} 的工作日报`;
+            const contentDiv = document.getElementById('reportContent');
+            const actionsDiv = document.getElementById('reportActions');
             
             try {
-                const response = await fetch(`${FEISHU_API}/auth/v3/tenant_access_token/internal`, {
+                const token = await getToken();
+                const res = await fetch(`${FEISHU_API}/bitable/v1/apps/${CONFIG.baseId}/tables/${CONFIG.tableId}/records/search`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        app_id: CONFIG.appId,
-                        app_secret: CONFIG.appSecret
+                        filter: {
+                            conjunction: 'and',
+                            conditions: [{ field_name: '日期', operator: 'is', value: [currentDate] }]
+                        }
                     })
                 });
+                const data = await res.json();
                 
-                const result = await response.json();
+                if (data.code !== 0) throw new Error(data.msg);
                 
-                if (result.code === 0) {
-                    accessToken = result.tenant_access_token;
-                    // token有效期2小时，这里设置1.5小时后刷新
-                    tokenExpireTime = Date.now() + (result.expire * 1000) - (30 * 60 * 1000);
-                    return accessToken;
-                } else {
-                    throw new Error(result.msg || '获取token失败');
-                }
-            } catch (err) {
-                throw new Error('获取访问权限失败：' + err.message);
-            }
-        }
-        
-        // 保存日报
-        async function saveReport() {
-            const date = document.getElementById('datePicker').value;
-            const content = document.getElementById('reportContent').value;
-            
-            if (!date) {
-                showStatus('请选择日期', 'error');
-                return;
-            }
-            
-            showStatus('正在保存...', 'loading');
-            
-            try {
-                const token = await getAccessToken();
-                
-                // 先查询是否已存在该日期的记录
-                const searchResponse = await fetch(
-                    `${FEISHU_API}/bitable/v1/apps/${CONFIG.baseId}/tables/${CONFIG.tableId}/records/search`,
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            filter: {
-                                conjunction: 'and',
-                                conditions: [
-                                    {
-                                        field_name: '日期',
-                                        operator: 'is',
-                                        value: [date]
-                                    }
-                                ]
-                            }
-                        })
-                    }
-                );
-                
-                const searchResult = await searchResponse.json();
-                
-                if (searchResult.code !== 0) {
-                    throw new Error(searchResult.msg || '查询失败');
-                }
-                
-                const existingRecords = searchResult.data?.items || [];
-                
-                if (existingRecords.length > 0) {
-                    // 更新已有记录
-                    const recordId = existingRecords[0].record_id;
-                    const updateResponse = await fetch(
-                        `${FEISHU_API}/bitable/v1/apps/${CONFIG.baseId}/tables/${CONFIG.tableId}/records/${recordId}`,
-                        {
-                            method: 'PUT',
-                            headers: {
-                                'Authorization': `Bearer ${token}`,
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                fields: {
-                                    '日期': date,
-                                    '工作内容': content
-                                }
-                            })
-                        }
-                    );
-                    
-                    const updateResult = await updateResponse.json();
-                    if (updateResult.code === 0) {
-                        showStatus('✅ 更新成功', 'success');
-                    } else {
-                        throw new Error(updateResult.msg || '更新失败');
-                    }
-                } else {
-                    // 创建新记录
-                    const createResponse = await fetch(
-                        `${FEISHU_API}/bitable/v1/apps/${CONFIG.baseId}/tables/${CONFIG.tableId}/records`,
-                        {
-                            method: 'POST',
-                            headers: {
-                                'Authorization': `Bearer ${token}`,
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                fields: {
-                                    '日期': date,
-                                    '工作内容': content
-                                }
-                            })
-                        }
-                    );
-                    
-                    const createResult = await createResponse.json();
-                    if (createResult.code === 0) {
-                        showStatus('✅ 保存成功', 'success');
-                    } else {
-                        throw new Error(createResult.msg || '保存失败');
-                    }
-                }
-            } catch (err) {
-                showStatus('❌ ' + err.message, 'error');
-                console.error(err);
-            }
-        }
-        
-        // 读取日报
-        async function loadReport() {
-            const date = document.getElementById('datePicker').value;
-            
-            if (!date) {
-                showStatus('请选择日期', 'error');
-                return;
-            }
-            
-            showStatus('正在读取...', 'loading');
-            
-            try {
-                const token = await getAccessToken();
-                
-                const response = await fetch(
-                    `${FEISHU_API}/bitable/v1/apps/${CONFIG.baseId}/tables/${CONFIG.tableId}/records/search`,
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            filter: {
-                                conjunction: 'and',
-                                conditions: [
-                                    {
-                                        field_name: '日期',
-                                        operator: 'is',
-                                        value: [date]
-                                    }
-                                ]
-                            }
-                        })
-                    }
-                );
-                
-                const result = await response.json();
-                
-                if (result.code !== 0) {
-                    throw new Error(result.msg || '查询失败');
-                }
-                
-                const records = result.data?.items || [];
+                const records = data.data?.items || [];
                 
                 if (records.length > 0) {
-                    const content = records[0].fields['工作内容'] || '';
-                    document.getElementById('reportContent').value = content;
-                    showStatus('✅ 读取成功', 'success');
+                    editingData = records[0];
+                    const workItems = JSON.parse(records[0].fields['工作项'] || '[]');
+                    const avgProgress = workItems.length > 0 
+                        ? Math.round(workItems.reduce((sum, item) => sum + (item.progress || 0), 0) / workItems.length)
+                        : 0;
+                    
+                    // 更新日期卡片显示
+                    const dayCard = document.getElementById(`day-${currentDate}`);
+                    if (dayCard) {
+                        dayCard.classList.add('has-data');
+                        document.getElementById(`day-info-${currentDate}`).textContent = `${workItems.length}项 ${avgProgress}%`;
+                    }
+                    
+                    // 显示工作项
+                    contentDiv.innerHTML = workItems.map((item, index) => `
+                        <div class="work-item">
+                            <div class="work-item-content">
+                                <div class="work-item-text">${index + 1}. ${item.content}</div>
+                                <div class="work-item-meta">
+                                    <span class="category-tag" style="background: ${getCategoryColor(item.category)}">${getCategoryName(item.category)}</span>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: ${item.progress}%"></div>
+                                    </div>
+                                    <span class="progress-text">${item.progress}%</span>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                    
+                    actionsDiv.innerHTML = `
+                        <button class="btn btn-primary" onclick="editReport()">编辑</button>
+                        <button class="btn btn-danger" onclick="deleteReport()">删除</button>
+                    `;
                 } else {
-                    document.getElementById('reportContent').value = '';
-                    showStatus('ℹ️ 该日期暂无记录', 'success');
+                    editingData = null;
+                    contentDiv.innerHTML = `
+                        <div class="empty-state">
+                            <p>暂无记录</p>
+                            <p>该日期暂无日报记录</p>
+                            <p style="margin-top: 15px;"><button class="btn btn-primary" onclick="createReport()">新建</button></p>
+                        </div>
+                    `;
+                    actionsDiv.innerHTML = '';
                 }
             } catch (err) {
-                showStatus('❌ ' + err.message, 'error');
-                console.error(err);
+                contentDiv.innerHTML = `<div class="empty-state"><p>加载失败</p><p>${err.message}</p></div>`;
             }
         }
         
-        // 加载最近7天
-        async function loadRecent() {
-            showStatus('正在加载...', 'loading');
-            document.getElementById('recentList').style.display = 'none';
+        function createReport() {
+            document.getElementById('reportDisplay').style.display = 'none';
+            document.getElementById('editArea').style.display = 'block';
+            document.getElementById('workInputs').innerHTML = '';
+            addWorkInput();
+        }
+        
+        function editReport() {
+            document.getElementById('reportDisplay').style.display = 'none';
+            document.getElementById('editArea').style.display = 'block';
+            
+            const workItems = editingData ? JSON.parse(editingData.fields['工作项'] || '[]') : [];
+            document.getElementById('workInputs').innerHTML = '';
+            
+            if (workItems.length === 0) {
+                addWorkInput();
+            } else {
+                workItems.forEach(item => addWorkInput(item));
+            }
+        }
+        
+        function addWorkInput(data = null) {
+            const container = document.getElementById('workInputs');
+            const id = 'work-' + Date.now() + '-' + Math.random();
+            
+            const div = document.createElement('div');
+            div.className = 'work-input-row';
+            div.id = id;
+            div.innerHTML = `
+                <div class="input-group">
+                    <label>工作内容</label>
+                    <input type="text" class="work-content" placeholder="描述今天完成的工作..." value="${data ? data.content : ''}">
+                </div>
+                <div style="display: flex; gap: 15px;">
+                    <div class="input-group" style="flex: 1;">
+                        <label>分类</label>
+                        <select class="work-category">
+                            ${categories.map(c => `<option value="${c.id}" ${data && data.category === c.id ? 'selected' : ''}>${c.name}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="input-group" style="flex: 1;">
+                        <label>完成度</label>
+                        <div class="slider-container">
+                            <input type="range" class="work-progress" min="0" max="100" value="${data ? data.progress : 100}" oninput="updateSliderValue(this)">
+                            <span class="slider-value">${data ? data.progress : 100}%</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-danger btn-sm" onclick="removeWorkInput('${id}')" style="align-self: flex-end; margin-bottom: 5px;">删除</button>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+        
+        function removeWorkInput(id) {
+            document.getElementById(id).remove();
+        }
+        
+        function updateSliderValue(slider) {
+            slider.nextElementSibling.textContent = slider.value + '%';
+        }
+        
+        function cancelEdit() {
+            document.getElementById('editArea').style.display = 'none';
+            document.getElementById('reportDisplay').style.display = 'block';
+        }
+        
+        async function saveReport() {
+            const rows = document.querySelectorAll('.work-input-row');
+            const workItems = [];
+            
+            rows.forEach(row => {
+                const content = row.querySelector('.work-content').value.trim();
+                if (content) {
+                    workItems.push({
+                        content: content,
+                        category: row.querySelector('.work-category').value,
+                        progress: parseInt(row.querySelector('.work-progress').value)
+                    });
+                }
+            });
+            
+            if (workItems.length === 0) {
+                showStatus('请至少填写一项工作内容', 'error', 'daily');
+                return;
+            }
+            
+            showStatus('保存中...', 'loading', 'daily');
             
             try {
-                const token = await getAccessToken();
+                const token = await getToken();
+                const avgProgress = Math.round(workItems.reduce((sum, item) => sum + item.progress, 0) / workItems.length);
                 
-                // 计算7天前的日期
-                const endDate = new Date();
-                const startDate = new Date();
-                startDate.setDate(endDate.getDate() - 7);
+                const fields = {
+                    '日期': currentDate,
+                    '工作项': JSON.stringify(workItems),
+                    '平均完成度': avgProgress,
+                    '记录数': workItems.length
+                };
                 
-                const formatDate = (d) => d.toISOString().split('T')[0];
-                
-                const response = await fetch(
-                    `${FEISHU_API}/bitable/v1/apps/${CONFIG.baseId}/tables/${CONFIG.tableId}/records/search`,
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            filter: {
-                                conjunction: 'and',
-                                conditions: [
-                                    {
-                                        field_name: '日期',
-                                        operator: 'isGreaterThanOrEqual',
-                                        value: [formatDate(startDate)]
-                                    },
-                                    {
-                                        field_name: '日期',
-                                        operator: 'isLessThanOrEqual',
-                                        value: [formatDate(endDate)]
-                                    }
-                                ]
-                            },
-                            sort: [
-                                {
-                                    field_name: '日期',
-                                    desc: true
-                                }
-                            ]
-                        })
-                    }
-                );
-                
-                const result = await response.json();
-                
-                if (result.code !== 0) {
-                    throw new Error(result.msg || '查询失败');
-                }
-                
-                const records = result.data?.items || [];
-                const itemsDiv = document.getElementById('recentItems');
-                itemsDiv.innerHTML = '';
-                
-                if (records.length === 0) {
-                    itemsDiv.innerHTML = '<p style="color: #999;">暂无记录</p>';
+                if (editingData) {
+                    await fetch(`${FEISHU_API}/bitable/v1/apps/${CONFIG.baseId}/tables/${CONFIG.tableId}/records/${editingData.record_id}`, {
+                        method: 'PUT',
+                        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ fields })
+                    });
                 } else {
-                    records.forEach(item => {
-                        const date = item.fields['日期'];
-                        const content = item.fields['工作内容'] || '';
-                        const div = document.createElement('div');
-                        div.className = 'recent-item';
-                        div.innerHTML = `
-                            <div class="recent-date">${date}</div>
-                            <div class="recent-preview">${content.substring(0, 50)}${content.length > 50 ? '...' : ''}</div>
-                        `;
-                        div.onclick = () => {
-                            document.getElementById('datePicker').value = date;
-                            document.getElementById('reportContent').value = content;
-                            document.getElementById('recentList').style.display = 'none';
-                        };
-                        itemsDiv.appendChild(div);
+                    await fetch(`${FEISHU_API}/bitable/v1/apps/${CONFIG.baseId}/tables/${CONFIG.tableId}/records`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ fields })
                     });
                 }
                 
-                document.getElementById('recentList').style.display = 'block';
-                showStatus('✅ 加载完成', 'success');
+                showStatus('保存成功', 'success', 'daily');
+                cancelEdit();
+                loadReport();
+                updateStats();
             } catch (err) {
-                showStatus('❌ ' + err.message, 'error');
-                console.error(err);
+                showStatus('保存失败：' + err.message, 'error', 'daily');
             }
         }
         
-        // 页面加载时自动读取今天的记录
-        window.onload = () => {
-            loadReport();
-        };
+        async function deleteReport() {
+            if (!confirm('确定要删除这条日报吗？')) return;
+            if (!editingData) return;
+            
+            try {
+                const token = await getToken();
+                await fetch(`${FEISHU_API}/bitable/v1/apps/${CONFIG.baseId}/tables/${CONFIG.tableId}/records/${editingData.record_id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                showStatus('删除成功', 'success', 'daily');
+                loadReport();
+                updateStats();
+            } catch (err) {
+                showStatus('删除失败', 'error', 'daily');
+            }
+        }
+        
+        // ============================================
+        // 分类管理
+        // ============================================
+        function openCategoryModal() {
+            document.getElementById('categoryModal').classList.add('active');
+            renderCategoryList();
+        }
+        
+        function closeCategoryModal() {
+            document.getElementById('categoryModal').classList.remove('active');
+        }
+        
+        function renderCategoryColors() {
+            const container = document.getElementById('newCategoryColors');
+            container.innerHTML = colorOptions.map(color => `
+                <div class="color-option ${color === selectedColor ? 'selected' : ''}" 
+                     style="background: ${color}" 
+                     onclick="selectColor('${color}')"></div>
+            `).join('');
+        }
+        
+        function selectColor(color) {
+            selectedColor = color;
+            renderCategoryColors();
+        }
+        
+        function renderCategoryList() {
+            const container = document.getElementById('categoryList');
+            container.innerHTML = categories.map((cat, index) => `
+                <div class="category-item" id="cat-${index}">
+                    <div class="color-dot" style="background: ${cat.color}"></div>
+                    <input type="text" class="category-input" value="${cat.name}" id="cat-name-${index}">
+                    <div class="category-actions">
+                        <button class="icon-btn" onclick="updateCategory(${index})">✓</button>
+                        <button class="icon-btn" onclick="deleteCategory(${index})">🗑</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function addCategory() {
+            const name = document.getElementById('newCategoryName').value.trim();
+            if (!name) return;
+            
+            const id = 'cat-' + Date.now();
+            categories.push({ id, name, color: selectedColor });
+            
+            document.getElementById('newCategoryName').value = '';
+            renderCategoryList();
+        }
+        
+        function updateCategory(index) {
+            const name = document.getElementById(`cat-name-${index}`).value.trim();
+            if (name) {
+                categories[index].name = name;
+                renderCategoryList();
+            }
+        }
+        
+        function deleteCategory(index) {
+            if (categories.length <= 1) {
+                alert('至少保留一个分类');
+                return;
+            }
+            categories.splice(index, 1);
+            renderCategoryList();
+        }
+        
+        function resetCategories() {
+            categories = [
+                { id: 'dev', name: '开发工作', color: '#1890ff' },
+                { id: 'design', name: '设计工作', color: '#eb2f96' },
+                { id: 'meeting', name: '会议沟通', color: '#faad14' },
+                { id: 'doc', name: '文档整理', color: '#52c41a' },
+                { id: 'research', name: '调研分析', color: '#722ed1' },
+                { id: 'deploy', name: '部署运维', color: '#fa541c' },
+                { id: 'other', name: '其他', color: '#999999' }
+            ];
+            renderCategoryList();
+        }
+        
+        function getCategoryColor(id) {
+            const cat = categories.find(c => c.id === id);
+            return cat ? cat.color : '#999';
+        }
+        
+        function getCategoryName(id) {
+            const cat = categories.find(c => c.id === id);
+            return cat ? cat.name : id;
+        }
+        
+        // ============================================
+        // 统计
+        // ============================================
+        async function updateStats() {
+            try {
+                const token = await getToken();
+                const today = new Date();
+                const weekStart = new Date(today);
+                weekStart.setDate(today.getDate() - today.getDay());
+                const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+                
+                const res = await fetch(`${FEISHU_API}/bitable/v1/apps/${CONFIG.baseId}/tables/${CONFIG.tableId}/records/search`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filter: { conjunction: 'and', conditions: [] } })
+                });
+                const data = await res.json();
+                const records = data.data?.items || [];
+                
+                let monthCount = 0, weekCount = 0, totalProgress = 0;
+                
+                records.forEach(record => {
+                    const date = new Date(record.fields['日期']);
+                    const progress = record.fields['平均完成度'] || 0;
+                    
+                    if (date >= monthStart) monthCount++;
+                    if (date >= weekStart) weekCount++;
+                    totalProgress += progress;
+                });
+                
+                document.getElementById('statMonth').textContent = monthCount;
+                document.getElementById('statWeek').textContent = weekCount;
+                document.getElementById('statAvg').textContent = records.length > 0 ? Math.round(totalProgress / records.length) + '%' : '0%';
+                document.getElementById('statTotal').textContent = records.length;
+            } catch (err) {
+                console.error('统计失败', err);
+            }
+        }
+        
+        // ============================================
+        // 周报功能
+        // ============================================
+        function generateWeekSelector() {
+            const container = document.getElementById('weekSelector');
+            const today = new Date();
+            
+            for (let i = 4; i >= 0; i--) {
+                const weekEnd = new Date(today);
+                weekEnd.setDate(today.getDate() - i * 7);
+                const weekStart = new Date(weekEnd);
+                weekStart.setDate(weekEnd.getDate() - 6);
+                
+                const weekStr = `${weekStart.getMonth()+1}/${weekStart.getDate()}-${weekEnd.getMonth()+1}/${weekEnd.getDate()}`;
+                const card = document.createElement('div');
+                card.className = 'week-card';
+                card.dataset.start = weekStart.toISOString().split('T')[0];
+                card.dataset.end = weekEnd.toISOString().split('T')[0];
+                card.innerHTML = `
+                    <div>${i === 0 ? '本周' : i === 1 ? '上周' : `前${i}周`}</div>
+                    <div style="font-size: 12px; color: #999;">${weekStr}</div>
+                `;
+                card.onclick = () => selectWeek(card);
+                container.appendChild(card);
+            }
+        }
+        
+        function selectWeek(card) {
+            document.querySelectorAll('.week-card').forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
+        }
+        
+        async function generateWeeklyReport() {
+            const selected = document.querySelector('.week-card.active');
+            if (!selected) {
+                alert('请先选择一周');
+                return;
+            }
+            
+            const startDate = selected.dataset.start;
+            const endDate = selected.dataset.end;
+            
+            try {
+                const token = await getToken();
+                const res = await fetch(`${FEISHU_API}/bitable/v1/apps/${CONFIG.baseId}/tables/${CONFIG.tableId}/records/search`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        filter: {
+                            conjunction: 'and',
+                            conditions: [
+                                { field_name: '日期', operator: 'isGreaterThanOrEqual', value: [startDate] },
+                                { field_name: '日期', operator: 'isLessThanOrEqual', value: [endDate] }
+                            ]
+                        }
+                    })
+                });
+                const data = await res.json();
+                const records = data.data?.items || [];
+                
+                if (records.length === 0) {
+                    document.getElementById('weeklyReport').innerHTML = '<div class="report-section"><p>该周暂无记录</p></div>';
+                    return;
+                }
+                
+                // 汇总数据
+                const summary = {};
+                let totalItems = 0;
+                let totalProgress = 0;
+                
+                records.forEach(record => {
+                    const items = JSON.parse(record.fields['工作项'] || '[]');
+                    items.forEach(item => {
+                        totalItems++;
+                        totalProgress += item.progress;
+                        if (!summary[item.category]) {
+                            summary[item.category] = { items: [], totalProgress: 0 };
+                        }
+                        summary[item.category].items.push(item);
+                        summary[item.category].totalProgress += item.progress;
+                    });
+                });
+                
+                const avgProgress = Math.round(totalProgress / totalItems);
+                
+                // 生成报告HTML
+                let reportHTML = `
+                    <div class="report-section">
+                        <div class="ai-summary">
+                            <h3>🤖 AI 智能总结</h3>
+                            <p>本周共完成 ${totalItems} 项工作，平均完成度 ${avgProgress}%</p>
+                            <div class="summary-grid">
+                                <div class="summary-item">
+                                    <div class="summary-label">工作天数</div>
+                                    <div class="summary-value">${records.length} 天</div>
+                                </div>
+                                <div class="summary-item">
+                                    <div class="summary-label">工作项总数</div>
+                                    <div class="summary-value">${totalItems} 项</div>
+                                </div>
+                                <div class="summary-item">
+                                    <div class="summary-label">平均完成度</div>
+                                    <div class="summary-value">${avgProgress}%</div>
+                                </div>
+                                <div class="summary-item">
+                                    <div class="summary-label">工作类型</div>
+                                    <div class="summary-value">${Object.keys(summary).length} 类</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h3 style="margin: 20px 0 15px;">工作类型分布</h3>
+                        <div class="distribution-bar">
+                            ${Object.entries(summary).map(([cat, data]) => {
+                                const percentage = (data.items.length / totalItems * 100).toFixed(1);
+                                return `<div class="distribution-segment" style="background: ${getCategoryColor(cat)}; width: ${percentage}%">${percentage > 10 ? getCategoryName(cat) : ''}</div>`;
+                            }).join('')}
+                        </div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 10px;">
+                            ${Object.entries(summary).map(([cat, data]) => `
+                                <div style="display: flex; align-items: center; gap: 5px;">
+                                    <div style="width: 12px; height: 12px; background: ${getCategoryColor(cat)}; border-radius: 2px;"></div>
+                                    <span style="font-size: 12px;">${getCategoryName(cat)} (${data.items.length}项)</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <h3 style="margin: 20px 0 15px;">工作总结</h3>
+                        <div class="work-summary-list">
+                            ${Object.entries(summary).map(([cat, data]) => {
+                                const catAvg = Math.round(data.totalProgress / data.items.length);
+                                const mergedContent = mergeSimilarContent(data.items.map(i => i.content));
+                                return `
+                                    <div class="summary-category">
+                                        <div class="summary-category-header" style="background: ${getCategoryColor(cat)}" onclick="toggleCategory(this)">
+                                            <span>${getCategoryName(cat)} (${data.items.length}项)</span>
+                                            <span>平均完成度 ${catAvg}% ▼</span>
+                                        </div>
+                                        <div class="summary-category-content">
+                                            <div style="margin-bottom: 10px; font-weight: bold; color: #333;">${mergedContent}</div>
+                                            ${data.items.map(item => `
+                                                <div class="summary-item-text">
+                                                    ${item.content} (${item.progress}%)
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('weeklyReport').innerHTML = reportHTML;
+            } catch (err) {
+                document.getElementById('weeklyReport').innerHTML = `<div class="report-section"><p>生成失败：${err.message}</p></div>`;
+            }
+        }
+        
+        // ============================================
+        // 月报功能
+        // ============================================
+        function generateMonthSelector() {
+            const container = document.getElementById('monthSelector');
+            const today = new Date();
+            
+            for (let i = 5; i >= 0; i--) {
+                const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
+                const monthStr = `${date.getFullYear()}年${date.getMonth() + 1}月`;
+                
+                const card = document.createElement('div');
+                card.className = 'month-card';
+                card.dataset.year = date.getFullYear();
+                card.dataset.month = date.getMonth() + 1;
+                card.innerHTML = `
+                    <div>${i === 0 ? '本月' : i === 1 ? '上月' : monthStr}</div>
+                `;
+                card.onclick = () => selectMonth(card);
+                container.appendChild(card);
+            }
+        }
+        
+        function selectMonth(card) {
+            document.querySelectorAll('.month-card').forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
+        }
+        
+        async function generateMonthlyReport() {
+            const selected = document.querySelector('.month-card.active');
+            if (!selected) {
+                alert('请先选择月份');
+                return;
+            }
+            
+            const year = parseInt(selected.dataset.year);
+            const month = parseInt(selected.dataset.month);
+            const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
+            const endDate = `${year}-${String(month).padStart(2, '0')}-${new Date(year, month, 0).getDate()}`;
+            
+            try {
+                const token = await getToken();
+                const res = await fetch(`${FEISHU_API}/bitable/v1/apps/${CONFIG.baseId}/tables/${CONFIG.tableId}/records/search`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        filter: {
+                            conjunction: 'and',
+                            conditions: [
+                                { field_name: '日期', operator: 'isGreaterThanOrEqual', value: [startDate] },
+                                { field_name: '日期', operator: 'isLessThanOrEqual', value: [endDate] }
+                            ]
+                        }
+                    })
+                });
+                const data = await res.json();
+                const records = data.data?.items || [];
+                
+                if (records.length === 0) {
+                    document.getElementById('monthlyReport').innerHTML = '<div class="report-section"><p>该月暂无记录</p></div>';
+                    return;
+                }
+                
+                // 按周分组
+                const weeks = {};
+                let totalItems = 0;
+                let totalProgress = 0;
+                const summary = {};
+                
+                records.forEach(record => {
+                    const date = new Date(record.fields['日期']);
+                    const weekNum = Math.ceil(date.getDate() / 7);
+                    if (!weeks[weekNum]) weeks[weekNum] = [];
+                    weeks[weekNum].push(record);
+                    
+                    const items = JSON.parse(record.fields['工作项'] || '[]');
+                    items.forEach(item => {
+                        totalItems++;
+                        totalProgress += item.progress;
+                        if (!summary[item.category]) {
+                            summary[item.category] = { items: [], totalProgress: 0 };
+                        }
+                        summary[item.category].items.push(item);
+                        summary[item.category].totalProgress += item.progress;
+                    });
+                });
+                
+                const avgProgress = Math.round(totalProgress / totalItems);
+                
+                let reportHTML = `
+                    <div class="report-section">
+                        <div class="ai-summary">
+                            <h3>🤖 AI 智能总结</h3>
+                            <p>${year}年${month}月共完成 ${totalItems} 项工作，平均完成度 ${avgProgress}%</p>
+                            <div class="summary-grid">
+                                <div class="summary-item">
+                                    <div class="summary-label">工作天数</div>
+                                    <div class="summary-value">${records.length} 天</div>
+                                </div>
+                                <div class="summary-item">
+                                    <div class="summary-label">工作项总数</div>
+                                    <div class="summary-value">${totalItems} 项</div>
+                                </div>
+                                <div class="summary-item">
+                                    <div class="summary-label">平均完成度</div>
+                                    <div class="summary-value">${avgProgress}%</div>
+                                </div>
+                                <div class="summary-item">
+                                    <div class="summary-label">工作类型</div>
+                                    <div class="summary-value">${Object.keys(summary).length} 类</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h3 style="margin: 20px 0 15px;">工作类型分布</h3>
+                        <div class="distribution-bar">
+                            ${Object.entries(summary).map(([cat, data]) => {
+                                const percentage = (data.items.length / totalItems * 100).toFixed(1);
+                                return `<div class="distribution-segment" style="background: ${getCategoryColor(cat)}; width: ${percentage}%">${percentage > 10 ? getCategoryName(cat) : ''}</div>`;
+                            }).join('')}
+                        </div>
+                        
+                        <h3 style="margin: 20px 0 15px;">工作总结</h3>
+                        <div class="work-summary-list">
+                            ${Object.entries(summary).map(([cat, data]) => {
+                                const catAvg = Math.round(data.totalProgress / data.items.length);
+                                const mergedContent = mergeSimilarContent(data.items.map(i => i.content));
+                                return `
+                                    <div class="summary-category">
+                                        <div class="summary-category-header" style="background: ${getCategoryColor(cat)}" onclick="toggleCategory(this)">
+                                            <span>${getCategoryName(cat)} (${data.items.length}项)</span>
+                                            <span>平均完成度 ${catAvg}% ▼</span>
+                                        </div>
+                                        <div class="summary-category-content">
+                                            <div style="margin-bottom: 10px; font-weight: bold; color: #333;">${mergedContent}</div>
+                                            ${data.items.map(item => `
+                                                <div class="summary-item-text">
+                                                    ${item.content} (${item.progress}%)
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                        
+                        <h3 style="margin: 20px 0 15px;">周度统计</h3>
+                        ${Object.entries(weeks).map(([week, records]) => {
+                            let weekItems = 0;
+                            let weekProgress = 0;
+                            records.forEach(r => {
+                                const items = JSON.parse(r.fields['工作项'] || '[]');
+                                weekItems += items.length;
+                                weekProgress += items.reduce((s, i) => s + i.progress, 0);
+                            });
+                            const weekAvg = weekItems > 0 ? Math.round(weekProgress / weekItems) : 0;
+                            return `
+                                <div style="padding: 10px; background: #f5f5f5; border-radius: 6px; margin-bottom: 10px;">
+                                    <strong>第${week}周</strong>：${records.length}天，${weekItems}项工作，平均完成度${weekAvg}%
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+                
+                document.getElementById('monthlyReport').innerHTML = reportHTML;
+            } catch (err) {
+                document.getElementById('monthlyReport').innerHTML = `<div class="report-section"><p>生成失败：${err.message}</p></div>`;
+            }
+        }
+        
+        // ============================================
+        // 工具函数
+        // ============================================
+        function switchTab(tab) {
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(`tab-${tab}`).classList.add('active');
+        }
+        
+        function showStatus(msg, type, prefix) {
+            const status = document.getElementById(`${prefix}Status`);
+            status.textContent = msg;
+            status.className = `status ${type}`;
+            if (type !== 'loading') setTimeout(() => status.style.display = 'none', 3000);
+        }
+        
+        function toggleCategory(header) {
+            const content = header.nextElementSibling;
+            content.style.display = content.style.display === 'none' ? 'block' : 'none';
+            header.querySelector('span:last-child').textContent = 
+                content.style.display === 'none' ? '展开 ▶' : header.querySelector('span:last-child').textContent.replace('▶', '▼');
+        }
+        
+        function mergeSimilarContent(items) {
+            // 简单的合并逻辑：提取共同关键词
+            if (items.length === 1) return items[0];
+            if (items.length <= 3) return `完成${items.length}项相关工作`;
+            return `完成${items.length}项工作`;
+        }
     </script>
 </body>
 </html>
