@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工作日报管理系统</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+        .header { 
+            background: rgba(255,255,255,0.95); 
+            padding: 30px; 
+            border-radius: 20px; 
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; margin-bottom: 20px; }
+        .date-selector { 
+            display: flex; 
+            gap: 10px; 
+            align-items: center; 
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        input[type="date"] { 
+            padding: 10px 15px; 
+            border: 2px solid #e0e0e0; 
+            border-radius: 10px; 
+            font-size: 16px;
+        }
+        button { 
+            padding: 10px 20px; 
+            border: none; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-primary:hover { background: #5568d3; transform: translateY(-2px); }
+        .btn-secondary { background: #f0f0f0; color: #333; margin-left: 5px; }
+        .btn-secondary:hover { background: #e0e0e0; }
+        
+        .content-area { 
+            background: rgba(255,255,255,0.95); 
+            padding: 30px; 
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        textarea { 
+            width: 100%; 
+            min-height: 300px; 
+            padding: 20px; 
+            border: 2px solid #e0e0e0; 
+            border-radius: 15px; 
+            font-size: 16px;
+            line-height: 1.6;
+            resize: vertical;
+            font-family: inherit;
+        }
+        textarea:focus { outline: none; border-color: #667eea; }
+        
+        .status { 
+            margin-top: 15px; 
+            padding: 15px; 
+            border-radius: 10px; 
+            display: none;
+        }
+        .status.success { background: #d4edda; color: #155724; display: block; }
+        .status.error { background: #f8d7da; color: #721c24; display: block; }
+        .status.loading { background: #fff3cd; color: #856404; display: block; }
+        
+        .recent-list { margin-top: 20px; }
+        .recent-item { 
+            padding: 15px; 
+            background: #f8f9fa; 
+            border-radius: 10px; 
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .recent-item:hover { background: #e9ecef; transform: translateX(5px); }
+        .recent-date { font-weight: bold; color: #667eea; }
+        .recent-preview { color: #666; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 工作日报管理系统</h1>
+            <div class="date-selector">
+                <label>选择日期：</label>
+                <input type="date" id="datePicker">
+                <button class="btn-primary" onclick="loadReport()">📖 读取</button>
+                <button class="btn-primary" onclick="saveReport()">💾 保存</button>
+                <button class="btn-secondary" onclick="loadRecent()">📅 最近7天</button>
+            </div>
+            <div id="status" class="status"></div>
+        </div>
+        
+        <div class="content-area">
+            <textarea id="reportContent" placeholder="在此输入您的工作日报内容...&#10;&#10;例如：&#10;1. 今日完成工作：&#10;2. 明日计划：&#10;3. 遇到的问题："></textarea>
+            
+            <div id="recentList" class="recent-list" style="display:none;">
+                <h3 style="margin-bottom: 15px; color: #333;">最近7天记录</h3>
+                <div id="recentItems"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // 飞书应用配置（已填写您的参数）
+        // ============================================
+        const CONFIG = {
+            appId: 'cli_a9283165da391bd8',
+            appSecret: '8VFsCfVbSxzPOeZCWjG44erL7fLiFZGl',
+            baseId: 'MpIibJusOa9Vt6s1wFJciMkvn4b',
+            tableId: 'tblhtlSIXhqkOy3A'
+        };
+        
+        // 飞书API基础地址
+        const FEISHU_API = 'https://open.feishu.cn/open-apis';
+        
+        // 存储token（实际项目中应妥善保管）
+        let accessToken = null;
+        let tokenExpireTime = 0;
+        
+        // 初始化日期选择器为今天
+        document.getElementById('datePicker').valueAsDate = new Date();
+        
+        // 显示状态消息
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            if (type !== 'loading') {
+                setTimeout(() => status.style.display = 'none', 3000);
+            }
+        }
+        
+        // 获取飞书访问token（tenant_access_token）
+        async function getAccessToken() {
+            // 如果token未过期，直接返回
+            if (accessToken && Date.now() < tokenExpireTime) {
+                return accessToken;
+            }
+            
+            try {
+                const response = await fetch(`${FEISHU_API}/auth/v3/tenant_access_token/internal`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        app_id: CONFIG.appId,
+                        app_secret: CONFIG.appSecret
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.code === 0) {
+                    accessToken = result.tenant_access_token;
+                    // token有效期2小时，这里设置1.5小时后刷新
+                    tokenExpireTime = Date.now() + (result.expire * 1000) - (30 * 60 * 1000);
+                    return accessToken;
+                } else {
+                    throw new Error(result.msg || '获取token失败');
+                }
+            } catch (err) {
+                throw new Error('获取访问权限失败：' + err.message);
+            }
+        }
+        
+        // 保存日报
+        async function saveReport() {
+            const date = document.getElementById('datePicker').value;
+            const content = document.getElementById('reportContent').value;
+            
+            if (!date) {
+                showStatus('请选择日期', 'error');
+                return;
+            }
+            
+            showStatus('正在保存...', 'loading');
+            
+            try {
+                const token = await getAccessToken();
+                
+                // 先查询是否已存在该日期的记录
+                const searchResponse = await fetch(
+                    `${FEISHU_API}/bitable/v1/apps/${CONFIG.baseId}/tables/${CONFIG.tableId}/records/search`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            filter: {
+                                conjunction: 'and',
+                                conditions: [
+                                    {
+                                        field_name: '日期',
+                                        operator: 'is',
+                                        value: [date]
+                                    }
+                                ]
+                            }
+                        })
+                    }
+                );
+                
+                const searchResult = await searchResponse.json();
+                
+                if (searchResult.code !== 0) {
+                    throw new Error(searchResult.msg || '查询失败');
+                }
+                
+                const existingRecords = searchResult.data?.items || [];
+                
+                if (existingRecords.length > 0) {
+                    // 更新已有记录
+                    const recordId = existingRecords[0].record_id;
+                    const updateResponse = await fetch(
+                        `${FEISHU_API}/bitable/v1/apps/${CONFIG.baseId}/tables/${CONFIG.tableId}/records/${recordId}`,
+                        {
+                            method: 'PUT',
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                fields: {
+                                    '日期': date,
+                                    '工作内容': content
+                                }
+                            })
+                        }
+                    );
+                    
+                    const updateResult = await updateResponse.json();
+                    if (updateResult.code === 0) {
+                        showStatus('✅ 更新成功', 'success');
+                    } else {
+                        throw new Error(updateResult.msg || '更新失败');
+                    }
+                } else {
+                    // 创建新记录
+                    const createResponse = await fetch(
+                        `${FEISHU_API}/bitable/v1/apps/${CONFIG.baseId}/tables/${CONFIG.tableId}/records`,
+                        {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                fields: {
+                                    '日期': date,
+                                    '工作内容': content
+                                }
+                            })
+                        }
+                    );
+                    
+                    const createResult = await createResponse.json();
+                    if (createResult.code === 0) {
+                        showStatus('✅ 保存成功', 'success');
+                    } else {
+                        throw new Error(createResult.msg || '保存失败');
+                    }
+                }
+            } catch (err) {
+                showStatus('❌ ' + err.message, 'error');
+                console.error(err);
+            }
+        }
+        
+        // 读取日报
+        async function loadReport() {
+            const date = document.getElementById('datePicker').value;
+            
+            if (!date) {
+                showStatus('请选择日期', 'error');
+                return;
+            }
+            
+            showStatus('正在读取...', 'loading');
+            
+            try {
+                const token = await getAccessToken();
+                
+                const response = await fetch(
+                    `${FEISHU_API}/bitable/v1/apps/${CONFIG.baseId}/tables/${CONFIG.tableId}/records/search`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            filter: {
+                                conjunction: 'and',
+                                conditions: [
+                                    {
+                                        field_name: '日期',
+                                        operator: 'is',
+                                        value: [date]
+                                    }
+                                ]
+                            }
+                        })
+                    }
+                );
+                
+                const result = await response.json();
+                
+                if (result.code !== 0) {
+                    throw new Error(result.msg || '查询失败');
+                }
+                
+                const records = result.data?.items || [];
+                
+                if (records.length > 0) {
+                    const content = records[0].fields['工作内容'] || '';
+                    document.getElementById('reportContent').value = content;
+                    showStatus('✅ 读取成功', 'success');
+                } else {
+                    document.getElementById('reportContent').value = '';
+                    showStatus('ℹ️ 该日期暂无记录', 'success');
+                }
+            } catch (err) {
+                showStatus('❌ ' + err.message, 'error');
+                console.error(err);
+            }
+        }
+        
+        // 加载最近7天
+        async function loadRecent() {
+            showStatus('正在加载...', 'loading');
+            document.getElementById('recentList').style.display = 'none';
+            
+            try {
+                const token = await getAccessToken();
+                
+                // 计算7天前的日期
+                const endDate = new Date();
+                const startDate = new Date();
+                startDate.setDate(endDate.getDate() - 7);
+                
+                const formatDate = (d) => d.toISOString().split('T')[0];
+                
+                const response = await fetch(
+                    `${FEISHU_API}/bitable/v1/apps/${CONFIG.baseId}/tables/${CONFIG.tableId}/records/search`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            filter: {
+                                conjunction: 'and',
+                                conditions: [
+                                    {
+                                        field_name: '日期',
+                                        operator: 'isGreaterThanOrEqual',
+                                        value: [formatDate(startDate)]
+                                    },
+                                    {
+                                        field_name: '日期',
+                                        operator: 'isLessThanOrEqual',
+                                        value: [formatDate(endDate)]
+                                    }
+                                ]
+                            },
+                            sort: [
+                                {
+                                    field_name: '日期',
+                                    desc: true
+                                }
+                            ]
+                        })
+                    }
+                );
+                
+                const result = await response.json();
+                
+                if (result.code !== 0) {
+                    throw new Error(result.msg || '查询失败');
+                }
+                
+                const records = result.data?.items || [];
+                const itemsDiv = document.getElementById('recentItems');
+                itemsDiv.innerHTML = '';
+                
+                if (records.length === 0) {
+                    itemsDiv.innerHTML = '<p style="color: #999;">暂无记录</p>';
+                } else {
+                    records.forEach(item => {
+                        const date = item.fields['日期'];
+                        const content = item.fields['工作内容'] || '';
+                        const div = document.createElement('div');
+                        div.className = 'recent-item';
+                        div.innerHTML = `
+                            <div class="recent-date">${date}</div>
+                            <div class="recent-preview">${content.substring(0, 50)}${content.length > 50 ? '...' : ''}</div>
+                        `;
+                        div.onclick = () => {
+                            document.getElementById('datePicker').value = date;
+                            document.getElementById('reportContent').value = content;
+                            document.getElementById('recentList').style.display = 'none';
+                        };
+                        itemsDiv.appendChild(div);
+                    });
+                }
+                
+                document.getElementById('recentList').style.display = 'block';
+                showStatus('✅ 加载完成', 'success');
+            } catch (err) {
+                showStatus('❌ ' + err.message, 'error');
+                console.error(err);
+            }
+        }
+        
+        // 页面加载时自动读取今天的记录
+        window.onload = () => {
+            loadReport();
+        };
+    </script>
+</body>
+</html>
