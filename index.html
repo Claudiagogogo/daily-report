@@ -4,1360 +4,957 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>工作日报管理系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
-            background: #f5f5f5;
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
         }
-        .header {
-            background: white;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .header h1 { font-size: 20px; color: #333; }
-        .stats {
-            display: flex;
-            gap: 20px;
-        }
-        .stat-card {
-            background: #f8f9fa;
-            padding: 10px 20px;
-            border-radius: 8px;
-            text-align: center;
-        }
-        .stat-value { font-size: 24px; font-weight: bold; color: #1890ff; }
-        .stat-label { font-size: 12px; color: #666; }
         
-        .nav {
-            background: white;
-            border-bottom: 1px solid #e8e8e8;
-            display: flex;
-            padding: 0 20px;
-        }
-        .nav-item {
-            padding: 15px 20px;
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-            color: #666;
-        }
-        .nav-item.active {
-            color: #1890ff;
-            border-bottom-color: #1890ff;
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
         
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
+        .task-item {
+            transition: all 0.3s ease;
         }
         
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        
-        /* 日报样式 */
-        .daily-section {
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        .section-title {
-            font-size: 16px;
-            color: #333;
-            margin-bottom: 15px;
-        }
-        .recent-days {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .day-card {
-            padding: 10px 15px;
-            border: 1px solid #e8e8e8;
-            border-radius: 6px;
-            cursor: pointer;
-            text-align: center;
-            min-width: 80px;
-        }
-        .day-card:hover { background: #f5f5f5; }
-        .day-card.active {
-            background: #1890ff;
-            color: white;
-            border-color: #1890ff;
-        }
-        .day-card.has-data {
-            border-color: #52c41a;
-            border-width: 2px;
-        }
-        .day-name { font-size: 12px; margin-bottom: 4px; }
-        .day-date { font-size: 14px; font-weight: bold; }
-        .day-info { font-size: 11px; margin-top: 4px; opacity: 0.8; }
-        
-        .date-selector {
-            margin: 20px 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        input[type="date"] {
-            padding: 8px 12px;
-            border: 1px solid #d9d9d9;
-            border-radius: 4px;
-            font-size: 14px;
+        .task-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         
-        .report-display {
-            background: #fafafa;
-            border: 1px solid #e8e8e8;
-            border-radius: 8px;
-            padding: 20px;
+        .category-badge {
+            transition: all 0.2s ease;
         }
-        .report-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .report-title { font-size: 18px; color: #333; }
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #999;
-        }
-        .empty-state p { margin: 10px 0; }
         
-        .work-item {
-            background: white;
-            border: 1px solid #e8e8e8;
-            border-radius: 6px;
-            padding: 15px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
+        .category-badge:hover {
+            transform: scale(1.05);
         }
-        .work-item-content { flex: 1; }
-        .work-item-text { font-size: 14px; color: #333; margin-bottom: 5px; }
-        .work-item-meta { display: flex; gap: 10px; align-items: center; }
-        .category-tag {
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            color: white;
-        }
-        .progress-bar {
-            width: 100px;
-            height: 6px;
-            background: #f0f0f0;
-            border-radius: 3px;
-            overflow: hidden;
-        }
-        .progress-fill {
-            height: 100%;
-            background: #52c41a;
-            border-radius: 3px;
-        }
-        .progress-text { font-size: 12px; color: #666; margin-left: 5px; }
         
-        .btn {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
         }
-        .btn-primary {
-            background: #1890ff;
-            color: white;
-        }
-        .btn-primary:hover { background: #40a9ff; }
-        .btn-default {
-            background: white;
-            border: 1px solid #d9d9d9;
-            color: #333;
-        }
-        .btn-default:hover { border-color: #1890ff; color: #1890ff; }
-        .btn-danger {
-            background: #ff4d4f;
-            color: white;
-        }
-        .btn-sm { padding: 4px 12px; font-size: 12px; }
         
-        .edit-area { margin-top: 20px; }
-        .work-input-row {
-            background: #f8f9fa;
-            border: 1px solid #e8e8e8;
-            border-radius: 6px;
-            padding: 15px;
-            margin-bottom: 10px;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .input-group { margin-bottom: 10px; }
-        .input-group label {
-            display: block;
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 5px;
-        }
-        input[type="text"], select {
-            width: 100%;
-            padding: 8px 12px;
-            border: 1px solid #d9d9d9;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        .slider-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        input[type="range"] { flex: 1; }
-        .slider-value { min-width: 40px; text-align: right; }
         
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
+        .slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .report-content {
+            line-height: 1.8;
+        }
+        
+        .report-content ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        
+        .report-content li {
+            position: relative;
+            padding-left: 1.5em;
+            margin-bottom: 0.5em;
+        }
+        
+        .report-content li::before {
+            content: "▸";
+            position: absolute;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-        .modal.active { display: flex; }
-        .modal-content {
-            background: white;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 80vh;
-            overflow: auto;
-        }
-        .modal-header {
-            padding: 20px;
-            border-bottom: 1px solid #e8e8e8;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .modal-body { padding: 20px; }
-        .modal-footer {
-            padding: 20px;
-            border-top: 1px solid #e8e8e8;
-            text-align: right;
-        }
-        .close-btn {
-            background: none;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            color: #999;
-        }
-        
-        .category-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .category-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 12px;
-            background: #f5f5f5;
-            border-radius: 6px;
-            border: 2px solid transparent;
-        }
-        .category-item.editing {
-            border-color: #1890ff;
-            background: #e6f7ff;
-        }
-        .color-dot {
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            cursor: pointer;
-        }
-        .category-input {
-            border: none;
-            background: transparent;
-            padding: 4px;
-            font-size: 14px;
-            width: 100px;
-        }
-        .category-actions {
-            display: flex;
-            gap: 5px;
-        }
-        .icon-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 4px;
-            color: #666;
-        }
-        .icon-btn:hover { color: #1890ff; }
-        
-        .color-picker {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 10px;
-        }
-        .color-option {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            cursor: pointer;
-            border: 2px solid transparent;
-        }
-        .color-option:hover { transform: scale(1.2); }
-        .color-option.selected { border-color: #333; }
-        
-        /* 周报月报样式 */
-        .report-section {
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        .ai-summary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-        .ai-summary h3 { margin-bottom: 10px; }
-        .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }
-        .summary-item {
-            background: rgba(255,255,255,0.2);
-            padding: 15px;
-            border-radius: 6px;
-        }
-        .summary-label { font-size: 12px; opacity: 0.9; }
-        .summary-value { font-size: 20px; font-weight: bold; margin-top: 5px; }
-        
-        .distribution-bar {
-            display: flex;
-            height: 30px;
-            border-radius: 15px;
-            overflow: hidden;
-            margin: 10px 0;
-        }
-        .distribution-segment {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 12px;
+            color: #667eea;
             font-weight: bold;
         }
         
-        .work-summary-list {
-            margin-top: 20px;
-        }
-        .summary-category {
-            margin-bottom: 15px;
-            border: 1px solid #e8e8e8;
-            border-radius: 6px;
-            overflow: hidden;
-        }
-        .summary-category-header {
-            padding: 12px 15px;
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .calendar-day {
+            transition: all 0.2s ease;
             cursor: pointer;
         }
-        .summary-category-content {
-            padding: 15px;
-            background: #fafafa;
-        }
-        .summary-item-text {
-            padding: 8px 0;
-            border-bottom: 1px dashed #e8e8e8;
-            font-size: 14px;
-        }
-        .summary-item-text:last-child { border-bottom: none; }
         
-        .week-selector, .month-selector {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
+        .calendar-day:hover:not(.empty) {
+            background-color: #f3f4f6;
+            transform: scale(1.1);
         }
-        .week-card, .month-card {
-            padding: 10px 15px;
-            border: 1px solid #e8e8e8;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-        .week-card:hover, .month-card:hover { background: #f5f5f5; }
-        .week-card.active, .month-card.active {
-            background: #1890ff;
+        
+        .calendar-day.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            border-color: #1890ff;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
         }
         
-        .status { 
-            padding: 10px 15px; 
-            border-radius: 4px; 
-            margin: 10px 0;
-            display: none;
+        .calendar-day.has-data::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            background-color: #10b981;
+            border-radius: 50%;
         }
-        .status.success { background: #f6ffed; border: 1px solid #b7eb8f; color: #52c41a; display: block; }
-        .status.error { background: #fff2f0; border: 1px solid #ffccc7; color: #ff4d4f; display: block; }
-        .status.loading { background: #e6f7ff; border: 1px solid #91d5ff; color: #1890ff; display: block; }
+        
+        .calendar-day.active.has-data::after {
+            background-color: white;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #c7c7c7;
+            border-radius: 3px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #a0a0a0;
+        }
+        
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+        
+        .color-picker-option {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 3px solid transparent;
+        }
+        
+        .color-picker-option:hover {
+            transform: scale(1.2);
+        }
+        
+        .color-picker-option.selected {
+            border-color: #1f2937;
+            transform: scale(1.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(245, 87, 108, 0.4);
+        }
     </style>
 </head>
-<body>
-    <div class="header">
-        <h1>📋 工作日报管理系统</h1>
-        <div class="stats">
-            <div class="stat-card">
-                <div class="stat-value" id="statMonth">0</div>
-                <div class="stat-label">本月记录</div>
+<body class="p-4 md:p-8">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <header class="glass-effect rounded-2xl p-6 mb-6 shadow-xl">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center text-white text-2xl shadow-lg">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800">工作日报管理系统</h1>
+                        <p class="text-gray-500 text-sm">高效记录 · 智能汇总 · 轻松复盘</p>
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="generateWeeklyReport()" class="btn-secondary px-6 py-2.5 rounded-xl text-white font-medium flex items-center gap-2 shadow-lg">
+                        <i class="fas fa-calendar-week"></i>
+                        生成周报
+                    </button>
+                    <button onclick="generateMonthlyReport()" class="btn-primary px-6 py-2.5 rounded-xl text-white font-medium flex items-center gap-2 shadow-lg">
+                        <i class="fas fa-calendar-alt"></i>
+                        生成月报
+                    </button>
+                </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-value" id="statWeek">0</div>
-                <div class="stat-label">本周记录</div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Left Sidebar: Calendar -->
+            <div class="lg:col-span-3 space-y-6">
+                <div class="glass-effect rounded-2xl p-6 shadow-xl">
+                    <div class="flex justify-between items-center mb-4">
+                        <button onclick="changeMonth(-1)" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                            <i class="fas fa-chevron-left text-gray-600"></i>
+                        </button>
+                        <h3 id="currentMonth" class="text-lg font-bold text-gray-800"></h3>
+                        <button onclick="changeMonth(1)" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                            <i class="fas fa-chevron-right text-gray-600"></i>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-7 gap-1 text-center text-xs text-gray-500 mb-2">
+                        <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
+                    </div>
+                    <div id="calendarGrid" class="grid grid-cols-7 gap-1">
+                        <!-- Calendar generated by JS -->
+                    </div>
+                </div>
+
+                <!-- Category Management -->
+                <div class="glass-effect rounded-2xl p-6 shadow-xl">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-gray-800 flex items-center gap-2">
+                            <i class="fas fa-tags text-indigo-500"></i>
+                            分类管理
+                        </h3>
+                        <button onclick="openCategoryModal()" class="text-sm text-indigo-600 hover:text-indigo-800 font-medium">
+                            <i class="fas fa-plus"></i> 新建
+                        </button>
+                    </div>
+                    <div id="categoryList" class="space-y-2 max-h-64 overflow-y-auto custom-scrollbar">
+                        <!-- Categories generated by JS -->
+                    </div>
+                </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-value" id="statAvg">0%</div>
-                <div class="stat-label">平均完成度</div>
+
+            <!-- Main Content: Daily Log -->
+            <div class="lg:col-span-6">
+                <div class="glass-effect rounded-2xl p-6 shadow-xl h-full">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h2 id="selectedDateDisplay" class="text-xl font-bold text-gray-800"></h2>
+                            <p class="text-gray-500 text-sm mt-1">记录今日工作点滴</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <span id="taskCount" class="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium">0 条记录</span>
+                        </div>
+                    </div>
+
+                    <!-- Add Task Form -->
+                    <div class="bg-gray-50 rounded-xl p-4 mb-6 border border-gray-200">
+                        <div class="flex flex-col gap-3">
+                            <textarea id="taskInput" rows="2" placeholder="输入工作内容..." 
+                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all resize-none"></textarea>
+                            <div class="flex justify-between items-center">
+                                <select id="categorySelect" class="px-4 py-2 rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none bg-white text-sm">
+                                    <!-- Options generated by JS -->
+                                </select>
+                                <button onclick="addTask()" class="btn-primary px-6 py-2 rounded-lg text-white font-medium flex items-center gap-2">
+                                    <i class="fas fa-plus"></i>
+                                    添加记录
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Task List -->
+                    <div id="taskList" class="space-y-3 max-h-[500px] overflow-y-auto custom-scrollbar pr-2">
+                        <!-- Tasks generated by JS -->
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="emptyState" class="hidden text-center py-12 text-gray-400">
+                        <i class="fas fa-clipboard text-4xl mb-3 opacity-50"></i>
+                        <p>今日暂无记录，添加第一条工作记录吧</p>
+                    </div>
+                </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-value" id="statTotal">0</div>
-                <div class="stat-label">总记录数</div>
+
+            <!-- Right Sidebar: Statistics & Preview -->
+            <div class="lg:col-span-3 space-y-6">
+                <div class="glass-effect rounded-2xl p-6 shadow-xl">
+                    <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-chart-pie text-purple-500"></i>
+                        本月概览
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center p-3 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg">
+                            <span class="text-gray-600 text-sm">记录天数</span>
+                            <span id="statDays" class="text-2xl font-bold text-indigo-600">0</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-gradient-to-r from-pink-50 to-rose-50 rounded-lg">
+                            <span class="text-gray-600 text-sm">总记录数</span>
+                            <span id="statTasks" class="text-2xl font-bold text-pink-600">0</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg">
+                            <span class="text-gray-600 text-sm">分类数量</span>
+                            <span id="statCategories" class="text-2xl font-bold text-amber-600">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-effect rounded-2xl p-6 shadow-xl">
+                    <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-lightbulb text-yellow-500"></i>
+                        使用提示
+                    </h3>
+                    <ul class="space-y-2 text-sm text-gray-600">
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check-circle text-green-500 mt-0.5"></i>
+                            <span>点击日历日期切换不同日期</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check-circle text-green-500 mt-0.5"></i>
+                            <span>支持为每条记录设置分类标签</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check-circle text-green-500 mt-0.5"></i>
+                            <span>周报月报会自动合并相似内容</span>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
-    
-    <div class="nav">
-        <div class="nav-item active" onclick="switchTab('daily')">日报</div>
-        <div class="nav-item" onclick="switchTab('weekly')">周报</div>
-        <div class="nav-item" onclick="switchTab('monthly')">月报</div>
-        <div style="flex: 1;"></div>
-        <div class="nav-item" onclick="openCategoryModal()">⚙️ 分类管理</div>
-    </div>
-    
-    <div class="container">
-        <!-- 日报标签 -->
-        <div id="tab-daily" class="tab-content active">
-            <div class="daily-section">
-                <div class="section-title">最近7天</div>
-                <div class="recent-days" id="recentDays"></div>
+
+    <!-- Category Modal -->
+    <div id="categoryModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl transform transition-all scale-100">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-gray-800">管理分类</h3>
+                <button onclick="closeCategoryModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
             </div>
             
-            <div class="daily-section">
-                <div class="date-selector">
-                    <label>选择日期：</label>
-                    <input type="date" id="datePicker">
-                </div>
-                
-                <div class="report-display" id="reportDisplay">
-                    <div class="report-header">
-                        <div class="report-title" id="reportTitle">2026-02-28 的工作日报</div>
-                        <div id="reportActions"></div>
-                    </div>
-                    <div id="reportContent"></div>
-                </div>
-                
-                <div id="editArea" style="display: none;">
-                    <div id="workInputs"></div>
-                    <button class="btn btn-default" onclick="addWorkInput()" style="margin: 10px 0;">
-                        + 添加工作项
-                    </button>
-                    <div style="margin-top: 15px;">
-                        <button class="btn btn-primary" onclick="saveReport()">保存</button>
-                        <button class="btn btn-default" onclick="cancelEdit()">取消</button>
-                    </div>
-                </div>
-                
-                <div id="dailyStatus" class="status"></div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">分类名称</label>
+                <input type="text" id="newCategoryName" placeholder="例如：项目开发" 
+                    class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none">
             </div>
-        </div>
-        
-        <!-- 周报标签 -->
-        <div id="tab-weekly" class="tab-content">
-            <div class="report-section">
-                <div class="section-title">选择周</div>
-                <div class="week-selector" id="weekSelector"></div>
-                <button class="btn btn-primary" onclick="generateWeeklyReport()">生成周报</button>
+            
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">选择颜色</label>
+                <div class="flex gap-3 flex-wrap" id="colorPicker">
+                    <!-- Colors generated by JS -->
+                </div>
             </div>
-            <div id="weeklyReport"></div>
-        </div>
-        
-        <!-- 月报标签 -->
-        <div id="tab-monthly" class="tab-content">
-            <div class="report-section">
-                <div class="section-title">选择月份</div>
-                <div class="month-selector" id="monthSelector"></div>
-                <button class="btn btn-primary" onclick="generateMonthlyReport()">生成月报</button>
+            
+            <div class="flex gap-3">
+                <button onclick="closeCategoryModal()" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                    取消
+                </button>
+                <button onclick="saveCategory()" class="flex-1 btn-primary px-4 py-2 rounded-lg text-white font-medium">
+                    保存分类
+                </button>
             </div>
-            <div id="monthlyReport"></div>
+            
+            <div class="mt-6 pt-4 border-t border-gray-200">
+                <p class="text-sm text-gray-500 mb-3">现有分类：</p>
+                <div id="modalCategoryList" class="space-y-2 max-h-40 overflow-y-auto">
+                    <!-- List for deletion -->
+                </div>
+            </div>
         </div>
     </div>
-    
-    <!-- 分类管理弹窗 -->
-    <div class="modal" id="categoryModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>分类管理</h3>
-                <button class="close-btn" onclick="closeCategoryModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="category-list" id="categoryList"></div>
-                <div style="border-top: 1px solid #e8e8e8; padding-top: 15px;">
-                    <label>添加新分类</label>
-                    <div style="display: flex; gap: 10px; margin-top: 10px;">
-                        <input type="text" id="newCategoryName" placeholder="分类名称" style="flex: 1;">
-                        <div class="color-picker" id="newCategoryColors"></div>
-                        <button class="btn btn-primary" onclick="addCategory()">添加</button>
-                    </div>
+
+    <!-- Report Modal -->
+    <div id="reportModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] shadow-2xl flex flex-col">
+            <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+                <div>
+                    <h3 id="reportTitle" class="text-xl font-bold text-gray-800"></h3>
+                    <p id="reportSubtitle" class="text-sm text-gray-500 mt-1"></p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="copyReport()" class="px-4 py-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors flex items-center gap-2">
+                        <i class="fas fa-copy"></i>
+                        复制
+                    </button>
+                    <button onclick="closeReportModal()" class="text-gray-400 hover:text-gray-600 p-2">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button class="btn btn-default" onclick="resetCategories()">重置默认</button>
-                <button class="btn btn-primary" onclick="closeCategoryModal()">完成</button>
+            <div id="reportContent" class="p-6 overflow-y-auto custom-scrollbar report-content text-gray-700">
+                <!-- Report content generated by JS -->
+            </div>
+            <div class="p-4 border-t border-gray-200 bg-gray-50 rounded-b-2xl flex justify-end gap-3">
+                <button onclick="closeReportModal()" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-white transition-colors">
+                    关闭
+                </button>
+                <button onclick="exportReport()" class="btn-primary px-6 py-2 rounded-lg text-white font-medium flex items-center gap-2">
+                    <i class="fas fa-download"></i>
+                    导出文本
+                </button>
             </div>
         </div>
     </div>
 
     <script>
-        // ============================================
-        // 配置
-        // ============================================
-        const CONFIG = {
-            appId: 'cli_a9283165da391bd8',
-            appSecret: '8VFsCfVbSxzPOeZCWjG44erL7fLiFZGl',
-            baseId: 'MpIibJusOa9Vt6s1wFJciMkvn4b',
-            tableId: 'tblhtlSIXhqkOy3A'
-        };
-        
-        const FEISHU_API = 'https://open.feishu.cn/open-apis';
-        let accessToken = null;
-        let tokenExpireTime = 0;
-        let currentDate = new Date().toISOString().split('T')[0];
-        let editingData = null;
-        let selectedColor = '#1890ff';
-        
-        // 默认分类
-        let categories = [
-            { id: 'dev', name: '开发工作', color: '#1890ff' },
-            { id: 'design', name: '设计工作', color: '#eb2f96' },
-            { id: 'meeting', name: '会议沟通', color: '#faad14' },
-            { id: 'doc', name: '文档整理', color: '#52c41a' },
-            { id: 'research', name: '调研分析', color: '#722ed1' },
-            { id: 'deploy', name: '部署运维', color: '#fa541c' },
-            { id: 'other', name: '其他', color: '#999999' }
+        // Data Management
+        let currentDate = new Date();
+        let selectedDate = new Date();
+        let categories = JSON.parse(localStorage.getItem('workCategories')) || [
+            { id: 1, name: '项目开发', color: '#3b82f6' },
+            { id: 2, name: '会议沟通', color: '#10b981' },
+            { id: 3, name: '文档编写', color: '#f59e0b' },
+            { id: 4, name: '学习提升', color: '#8b5cf6' },
+            { id: 5, name: '其他事务', color: '#6b7280' }
         ];
-        
-        const colorOptions = [
-            '#1890ff', '#eb2f96', '#faad14', '#52c41a', '#722ed1', '#fa541c',
-            '#13c2c2', '#2f54eb', '#f5222d', '#a0d911', '#fa8c16', '#597ef7',
-            '#9254de', '#36cfc9', '#bfbfbf'
-        ];
-        
-        // ============================================
-        // 初始化
-        // ============================================
+        let dailyLogs = JSON.parse(localStorage.getItem('workDailyLogs')) || {};
+        let editingCategoryId = null;
+        let selectedColor = categories[0]?.color || '#3b82f6';
+
+        // Initialize
         document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('datePicker').value = currentDate;
-            generateRecentDays();
-            generateWeekSelector();
-            generateMonthSelector();
-            renderCategoryColors();
-            loadCategories().then(() => {
-                loadReport();
-                updateStats();
+            renderCalendar();
+            renderCategories();
+            renderCategoryOptions();
+            loadDateData();
+            updateStatistics();
+            initColorPicker();
+            
+            // Enter key to add task
+            document.getElementById('taskInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    addTask();
+                }
             });
         });
-        
-        // ============================================
-        // 飞书API
-        // ============================================
-        async function getToken() {
-            if (accessToken && Date.now() < tokenExpireTime) return accessToken;
+
+        // Calendar Functions
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
             
-            const res = await fetch(`${FEISHU_API}/auth/v3/tenant_access_token/internal`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ app_id: CONFIG.appId, app_secret: CONFIG.appSecret })
-            });
-            const data = await res.json();
-            if (data.code === 0) {
-                accessToken = data.tenant_access_token;
-                tokenExpireTime = Date.now() + (data.expire * 1000) - (30 * 60 * 1000);
-                return accessToken;
+            document.getElementById('currentMonth').textContent = 
+                `${year}年${month + 1}月`;
+            
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+            
+            // Empty cells
+            for (let i = 0; i < firstDay; i++) {
+                const empty = document.createElement('div');
+                empty.className = 'calendar-day empty p-2';
+                grid.appendChild(empty);
             }
-            throw new Error(data.msg);
-        }
-        
-        // 从飞书加载分类（存储在单独的表中或使用字段）
-        async function loadCategories() {
-            // 这里简化处理，实际可以存储在飞书另一个表中
-            // 暂时使用内存中的分类
-            return categories;
-        }
-        
-        // ============================================
-        // 日报功能
-        // ============================================
-        function generateRecentDays() {
-            const container = document.getElementById('recentDays');
-            const today = new Date();
             
-            for (let i = 6; i >= 0; i--) {
-                const date = new Date(today);
-                date.setDate(today.getDate() - i);
-                const dateStr = date.toISOString().split('T')[0];
-                const dayName = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][date.getDay()];
+            // Days
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = formatDateKey(new Date(year, month, day));
+                const hasData = dailyLogs[dateStr] && dailyLogs[dateStr].length > 0;
+                const isSelected = isSameDate(new Date(year, month, day), selectedDate);
                 
-                const card = document.createElement('div');
-                card.className = 'day-card';
-                card.id = `day-${dateStr}`;
-                card.innerHTML = `
-                    <div class="day-name">${i === 0 ? '今天' : i === 1 ? '昨天' : dayName}</div>
-                    <div class="day-date">${date.getMonth() + 1}/${date.getDate()}</div>
-                    <div class="day-info" id="day-info-${dateStr}"></div>
-                `;
-                card.onclick = () => selectDate(dateStr);
-                container.appendChild(card);
+                const cell = document.createElement('div');
+                cell.className = `calendar-day relative p-2 rounded-lg text-center text-sm font-medium ${isSelected ? 'active' : 'hover:bg-gray-100'} ${hasData ? 'has-data' : ''}`;
+                cell.textContent = day;
+                cell.onclick = () => selectDate(new Date(year, month, day));
+                
+                grid.appendChild(cell);
             }
         }
-        
+
+        function changeMonth(delta) {
+            currentDate.setMonth(currentDate.getMonth() + delta);
+            renderCalendar();
+        }
+
         function selectDate(date) {
-            currentDate = date;
-            document.getElementById('datePicker').value = date;
-            document.querySelectorAll('.day-card').forEach(card => {
-                card.classList.toggle('active', card.id === `day-${date}`);
-            });
-            loadReport();
+            selectedDate = date;
+            renderCalendar();
+            loadDateData();
         }
-        
-        async function loadReport() {
-            document.getElementById('reportTitle').textContent = `${currentDate} 的工作日报`;
-            const contentDiv = document.getElementById('reportContent');
-            const actionsDiv = document.getElementById('reportActions');
+
+        function isSameDate(d1, d2) {
+            return d1.getFullYear() === d2.getFullYear() &&
+                   d1.getMonth() === d2.getMonth() &&
+                   d1.getDate() === d2.getDate();
+        }
+
+        function formatDateKey(date) {
+            return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        }
+
+        function formatDateDisplay(date) {
+            const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+            return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 ${weekdays[date.getDay()]}`;
+        }
+
+        // Task Management
+        function loadDateData() {
+            const dateKey = formatDateKey(selectedDate);
+            const tasks = dailyLogs[dateKey] || [];
             
-            try {
-                const token = await getToken();
-                const res = await fetch(`${FEISHU_API}/bitable/v1/apps/${CONFIG.baseId}/tables/${CONFIG.tableId}/records/search`, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        filter: {
-                            conjunction: 'and',
-                            conditions: [{ field_name: '日期', operator: 'is', value: [currentDate] }]
-                        }
-                    })
-                });
-                const data = await res.json();
-                
-                if (data.code !== 0) throw new Error(data.msg);
-                
-                const records = data.data?.items || [];
-                
-                if (records.length > 0) {
-                    editingData = records[0];
-                    const workItems = JSON.parse(records[0].fields['工作项'] || '[]');
-                    const avgProgress = workItems.length > 0 
-                        ? Math.round(workItems.reduce((sum, item) => sum + (item.progress || 0), 0) / workItems.length)
-                        : 0;
-                    
-                    // 更新日期卡片显示
-                    const dayCard = document.getElementById(`day-${currentDate}`);
-                    if (dayCard) {
-                        dayCard.classList.add('has-data');
-                        document.getElementById(`day-info-${currentDate}`).textContent = `${workItems.length}项 ${avgProgress}%`;
-                    }
-                    
-                    // 显示工作项
-                    contentDiv.innerHTML = workItems.map((item, index) => `
-                        <div class="work-item">
-                            <div class="work-item-content">
-                                <div class="work-item-text">${index + 1}. ${item.content}</div>
-                                <div class="work-item-meta">
-                                    <span class="category-tag" style="background: ${getCategoryColor(item.category)}">${getCategoryName(item.category)}</span>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width: ${item.progress}%"></div>
-                                    </div>
-                                    <span class="progress-text">${item.progress}%</span>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('');
-                    
-                    actionsDiv.innerHTML = `
-                        <button class="btn btn-primary" onclick="editReport()">编辑</button>
-                        <button class="btn btn-danger" onclick="deleteReport()">删除</button>
-                    `;
-                } else {
-                    editingData = null;
-                    contentDiv.innerHTML = `
-                        <div class="empty-state">
-                            <p>暂无记录</p>
-                            <p>该日期暂无日报记录</p>
-                            <p style="margin-top: 15px;"><button class="btn btn-primary" onclick="createReport()">新建</button></p>
-                        </div>
-                    `;
-                    actionsDiv.innerHTML = '';
-                }
-            } catch (err) {
-                contentDiv.innerHTML = `<div class="empty-state"><p>加载失败</p><p>${err.message}</p></div>`;
-            }
-        }
-        
-        function createReport() {
-            document.getElementById('reportDisplay').style.display = 'none';
-            document.getElementById('editArea').style.display = 'block';
-            document.getElementById('workInputs').innerHTML = '';
-            addWorkInput();
-        }
-        
-        function editReport() {
-            document.getElementById('reportDisplay').style.display = 'none';
-            document.getElementById('editArea').style.display = 'block';
+            document.getElementById('selectedDateDisplay').textContent = formatDateDisplay(selectedDate);
+            document.getElementById('taskCount').textContent = `${tasks.length} 条记录`;
             
-            const workItems = editingData ? JSON.parse(editingData.fields['工作项'] || '[]') : [];
-            document.getElementById('workInputs').innerHTML = '';
+            renderTaskList(tasks);
+        }
+
+        function renderTaskList(tasks) {
+            const list = document.getElementById('taskList');
+            const emptyState = document.getElementById('emptyState');
             
-            if (workItems.length === 0) {
-                addWorkInput();
-            } else {
-                workItems.forEach(item => addWorkInput(item));
-            }
-        }
-        
-        function addWorkInput(data = null) {
-            const container = document.getElementById('workInputs');
-            const id = 'work-' + Date.now() + '-' + Math.random();
-            
-            const div = document.createElement('div');
-            div.className = 'work-input-row';
-            div.id = id;
-            div.innerHTML = `
-                <div class="input-group">
-                    <label>工作内容</label>
-                    <input type="text" class="work-content" placeholder="描述今天完成的工作..." value="${data ? data.content : ''}">
-                </div>
-                <div style="display: flex; gap: 15px;">
-                    <div class="input-group" style="flex: 1;">
-                        <label>分类</label>
-                        <select class="work-category">
-                            ${categories.map(c => `<option value="${c.id}" ${data && data.category === c.id ? 'selected' : ''}>${c.name}</option>`).join('')}
-                        </select>
-                    </div>
-                    <div class="input-group" style="flex: 1;">
-                        <label>完成度</label>
-                        <div class="slider-container">
-                            <input type="range" class="work-progress" min="0" max="100" value="${data ? data.progress : 100}" oninput="updateSliderValue(this)">
-                            <span class="slider-value">${data ? data.progress : 100}%</span>
-                        </div>
-                    </div>
-                    <button class="btn btn-danger btn-sm" onclick="removeWorkInput('${id}')" style="align-self: flex-end; margin-bottom: 5px;">删除</button>
-                </div>
-            `;
-            container.appendChild(div);
-        }
-        
-        function removeWorkInput(id) {
-            document.getElementById(id).remove();
-        }
-        
-        function updateSliderValue(slider) {
-            slider.nextElementSibling.textContent = slider.value + '%';
-        }
-        
-        function cancelEdit() {
-            document.getElementById('editArea').style.display = 'none';
-            document.getElementById('reportDisplay').style.display = 'block';
-        }
-        
-        async function saveReport() {
-            const rows = document.querySelectorAll('.work-input-row');
-            const workItems = [];
-            
-            rows.forEach(row => {
-                const content = row.querySelector('.work-content').value.trim();
-                if (content) {
-                    workItems.push({
-                        content: content,
-                        category: row.querySelector('.work-category').value,
-                        progress: parseInt(row.querySelector('.work-progress').value)
-                    });
-                }
-            });
-            
-            if (workItems.length === 0) {
-                showStatus('请至少填写一项工作内容', 'error', 'daily');
+            if (tasks.length === 0) {
+                list.innerHTML = '';
+                emptyState.classList.remove('hidden');
                 return;
             }
             
-            showStatus('保存中...', 'loading', 'daily');
-            
-            try {
-                const token = await getToken();
-                const avgProgress = Math.round(workItems.reduce((sum, item) => sum + item.progress, 0) / workItems.length);
-                
-                const fields = {
-                    '日期': currentDate,
-                    '工作项': JSON.stringify(workItems),
-                    '平均完成度': avgProgress,
-                    '记录数': workItems.length
-                };
-                
-                if (editingData) {
-                    await fetch(`${FEISHU_API}/bitable/v1/apps/${CONFIG.baseId}/tables/${CONFIG.tableId}/records/${editingData.record_id}`, {
-                        method: 'PUT',
-                        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ fields })
-                    });
-                } else {
-                    await fetch(`${FEISHU_API}/bitable/v1/apps/${CONFIG.baseId}/tables/${CONFIG.tableId}/records`, {
-                        method: 'POST',
-                        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ fields })
-                    });
-                }
-                
-                showStatus('保存成功', 'success', 'daily');
-                cancelEdit();
-                loadReport();
-                updateStats();
-            } catch (err) {
-                showStatus('保存失败：' + err.message, 'error', 'daily');
-            }
-        }
-        
-        async function deleteReport() {
-            if (!confirm('确定要删除这条日报吗？')) return;
-            if (!editingData) return;
-            
-            try {
-                const token = await getToken();
-                await fetch(`${FEISHU_API}/bitable/v1/apps/${CONFIG.baseId}/tables/${CONFIG.tableId}/records/${editingData.record_id}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                
-                showStatus('删除成功', 'success', 'daily');
-                loadReport();
-                updateStats();
-            } catch (err) {
-                showStatus('删除失败', 'error', 'daily');
-            }
-        }
-        
-        // ============================================
-        // 分类管理
-        // ============================================
-        function openCategoryModal() {
-            document.getElementById('categoryModal').classList.add('active');
-            renderCategoryList();
-        }
-        
-        function closeCategoryModal() {
-            document.getElementById('categoryModal').classList.remove('active');
-        }
-        
-        function renderCategoryColors() {
-            const container = document.getElementById('newCategoryColors');
-            container.innerHTML = colorOptions.map(color => `
-                <div class="color-option ${color === selectedColor ? 'selected' : ''}" 
-                     style="background: ${color}" 
-                     onclick="selectColor('${color}')"></div>
-            `).join('');
-        }
-        
-        function selectColor(color) {
-            selectedColor = color;
-            renderCategoryColors();
-        }
-        
-        function renderCategoryList() {
-            const container = document.getElementById('categoryList');
-            container.innerHTML = categories.map((cat, index) => `
-                <div class="category-item" id="cat-${index}">
-                    <div class="color-dot" style="background: ${cat.color}"></div>
-                    <input type="text" class="category-input" value="${cat.name}" id="cat-name-${index}">
-                    <div class="category-actions">
-                        <button class="icon-btn" onclick="updateCategory(${index})">✓</button>
-                        <button class="icon-btn" onclick="deleteCategory(${index})">🗑</button>
+            emptyState.classList.add('hidden');
+            list.innerHTML = tasks.map((task, index) => {
+                const category = categories.find(c => c.id === task.categoryId) || categories[0];
+                return `
+                    <div class="task-item bg-white border border-gray-200 rounded-xl p-4 flex justify-between items-start gap-3 slide-in" style="animation-delay: ${index * 0.05}s">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="category-badge px-2 py-1 rounded-md text-xs font-medium text-white" 
+                                      style="background-color: ${category.color}">
+                                    ${category.name}
+                                </span>
+                                <span class="text-xs text-gray-400">${task.time}</span>
+                            </div>
+                            <p class="text-gray-700 text-sm leading-relaxed">${escapeHtml(task.content)}</p>
+                        </div>
+                        <button onclick="deleteTask(${index})" class="text-gray-400 hover:text-red-500 transition-colors p-1">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
                     </div>
+                `;
+            }).join('');
+        }
+
+        function addTask() {
+            const input = document.getElementById('taskInput');
+            const categorySelect = document.getElementById('categorySelect');
+            const content = input.value.trim();
+            
+            if (!content) {
+                input.focus();
+                input.classList.add('ring-2', 'ring-red-200', 'border-red-300');
+                setTimeout(() => input.classList.remove('ring-2', 'ring-red-200', 'border-red-300'), 2000);
+                return;
+            }
+            
+            const dateKey = formatDateKey(selectedDate);
+            if (!dailyLogs[dateKey]) {
+                dailyLogs[dateKey] = [];
+            }
+            
+            const now = new Date();
+            dailyLogs[dateKey].push({
+                content: content,
+                categoryId: parseInt(categorySelect.value),
+                time: `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`,
+                timestamp: now.getTime()
+            });
+            
+            saveData();
+            input.value = '';
+            loadDateData();
+            renderCalendar();
+            updateStatistics();
+        }
+
+        function deleteTask(index) {
+            const dateKey = formatDateKey(selectedDate);
+            if (dailyLogs[dateKey]) {
+                dailyLogs[dateKey].splice(index, 1);
+                if (dailyLogs[dateKey].length === 0) {
+                    delete dailyLogs[dateKey];
+                }
+                saveData();
+                loadDateData();
+                renderCalendar();
+                updateStatistics();
+            }
+        }
+
+        // Category Management
+        function renderCategories() {
+            const list = document.getElementById('categoryList');
+            list.innerHTML = categories.map(cat => `
+                <div class="flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg group cursor-pointer" onclick="editCategory(${cat.id})">
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full" style="background-color: ${cat.color}"></div>
+                        <span class="text-sm text-gray-700">${cat.name}</span>
+                    </div>
+                    <i class="fas fa-pencil-alt text-gray-300 group-hover:text-gray-500 text-xs"></i>
                 </div>
             `).join('');
         }
-        
-        function addCategory() {
-            const name = document.getElementById('newCategoryName').value.trim();
-            if (!name) return;
-            
-            const id = 'cat-' + Date.now();
-            categories.push({ id, name, color: selectedColor });
-            
+
+        function renderCategoryOptions() {
+            const select = document.getElementById('categorySelect');
+            select.innerHTML = categories.map(cat => 
+                `<option value="${cat.id}">${cat.name}</option>`
+            ).join('');
+        }
+
+        function initColorPicker() {
+            const colors = ['#ef4444', '#f97316', '#f59e0b', '#84cc16', '#10b981', '#06b6d4', '#3b82f6', '#6366f1', '#8b5cf6', '#ec4899', '#6b7280', '#1f2937'];
+            const picker = document.getElementById('colorPicker');
+            picker.innerHTML = colors.map(color => `
+                <div class="color-picker-option ${color === selectedColor ? 'selected' : ''}" 
+                     style="background-color: ${color}" 
+                     onclick="selectColor('${color}')"></div>
+            `).join('');
+        }
+
+        function selectColor(color) {
+            selectedColor = color;
+            document.querySelectorAll('.color-picker-option').forEach(el => {
+                el.classList.toggle('selected', el.style.backgroundColor === color || 
+                    rgbToHex(el.style.backgroundColor) === color);
+            });
+        }
+
+        function rgbToHex(rgb) {
+            if (!rgb || rgb.startsWith('#')) return rgb;
+            const [r, g, b] = rgb.match(/\d+/g);
+            return '#' + [r, g, b].map(x => parseInt(x).toString(16).padStart(2, '0')).join('');
+        }
+
+        function openCategoryModal() {
+            editingCategoryId = null;
             document.getElementById('newCategoryName').value = '';
-            renderCategoryList();
+            selectedColor = categories[0]?.color || '#3b82f6';
+            initColorPicker();
+            renderModalCategoryList();
+            document.getElementById('categoryModal').classList.remove('hidden');
         }
-        
-        function updateCategory(index) {
-            const name = document.getElementById(`cat-name-${index}`).value.trim();
-            if (name) {
-                categories[index].name = name;
-                renderCategoryList();
+
+        function closeCategoryModal() {
+            document.getElementById('categoryModal').classList.add('hidden');
+        }
+
+        function editCategory(id) {
+            const cat = categories.find(c => c.id === id);
+            if (!cat) return;
+            
+            editingCategoryId = id;
+            document.getElementById('newCategoryName').value = cat.name;
+            selectedColor = cat.color;
+            initColorPicker();
+            renderModalCategoryList();
+            document.getElementById('categoryModal').classList.remove('hidden');
+        }
+
+        function renderModalCategoryList() {
+            const list = document.getElementById('modalCategoryList');
+            list.innerHTML = categories.map(cat => `
+                <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full" style="background-color: ${cat.color}"></div>
+                        <span class="text-sm text-gray-700">${cat.name}</span>
+                    </div>
+                    <button onclick="deleteCategory(${cat.id})" class="text-red-400 hover:text-red-600 text-sm">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function saveCategory() {
+            const name = document.getElementById('newCategoryName').value.trim();
+            if (!name) {
+                alert('请输入分类名称');
+                return;
             }
+            
+            if (editingCategoryId) {
+                const cat = categories.find(c => c.id === editingCategoryId);
+                if (cat) {
+                    cat.name = name;
+                    cat.color = selectedColor;
+                }
+            } else {
+                const newId = Math.max(...categories.map(c => c.id), 0) + 1;
+                categories.push({ id: newId, name, color: selectedColor });
+            }
+            
+            saveData();
+            renderCategories();
+            renderCategoryOptions();
+            renderModalCategoryList();
+            document.getElementById('newCategoryName').value = '';
+            editingCategoryId = null;
         }
-        
-        function deleteCategory(index) {
+
+        function deleteCategory(id) {
             if (categories.length <= 1) {
                 alert('至少保留一个分类');
                 return;
             }
-            categories.splice(index, 1);
-            renderCategoryList();
-        }
-        
-        function resetCategories() {
-            categories = [
-                { id: 'dev', name: '开发工作', color: '#1890ff' },
-                { id: 'design', name: '设计工作', color: '#eb2f96' },
-                { id: 'meeting', name: '会议沟通', color: '#faad14' },
-                { id: 'doc', name: '文档整理', color: '#52c41a' },
-                { id: 'research', name: '调研分析', color: '#722ed1' },
-                { id: 'deploy', name: '部署运维', color: '#fa541c' },
-                { id: 'other', name: '其他', color: '#999999' }
-            ];
-            renderCategoryList();
-        }
-        
-        function getCategoryColor(id) {
-            const cat = categories.find(c => c.id === id);
-            return cat ? cat.color : '#999';
-        }
-        
-        function getCategoryName(id) {
-            const cat = categories.find(c => c.id === id);
-            return cat ? cat.name : id;
-        }
-        
-        // ============================================
-        // 统计
-        // ============================================
-        async function updateStats() {
-            try {
-                const token = await getToken();
-                const today = new Date();
-                const weekStart = new Date(today);
-                weekStart.setDate(today.getDate() - today.getDay());
-                const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-                
-                const res = await fetch(`${FEISHU_API}/bitable/v1/apps/${CONFIG.baseId}/tables/${CONFIG.tableId}/records/search`, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ filter: { conjunction: 'and', conditions: [] } })
-                });
-                const data = await res.json();
-                const records = data.data?.items || [];
-                
-                let monthCount = 0, weekCount = 0, totalProgress = 0;
-                
-                records.forEach(record => {
-                    const date = new Date(record.fields['日期']);
-                    const progress = record.fields['平均完成度'] || 0;
-                    
-                    if (date >= monthStart) monthCount++;
-                    if (date >= weekStart) weekCount++;
-                    totalProgress += progress;
-                });
-                
-                document.getElementById('statMonth').textContent = monthCount;
-                document.getElementById('statWeek').textContent = weekCount;
-                document.getElementById('statAvg').textContent = records.length > 0 ? Math.round(totalProgress / records.length) + '%' : '0%';
-                document.getElementById('statTotal').textContent = records.length;
-            } catch (err) {
-                console.error('统计失败', err);
-            }
-        }
-        
-        // ============================================
-        // 周报功能
-        // ============================================
-        function generateWeekSelector() {
-            const container = document.getElementById('weekSelector');
-            const today = new Date();
+            if (!confirm('确定删除此分类？相关记录将归为默认分类。')) return;
             
-            for (let i = 4; i >= 0; i--) {
-                const weekEnd = new Date(today);
-                weekEnd.setDate(today.getDate() - i * 7);
-                const weekStart = new Date(weekEnd);
-                weekStart.setDate(weekEnd.getDate() - 6);
-                
-                const weekStr = `${weekStart.getMonth()+1}/${weekStart.getDate()}-${weekEnd.getMonth()+1}/${weekEnd.getDate()}`;
-                const card = document.createElement('div');
-                card.className = 'week-card';
-                card.dataset.start = weekStart.toISOString().split('T')[0];
-                card.dataset.end = weekEnd.toISOString().split('T')[0];
-                card.innerHTML = `
-                    <div>${i === 0 ? '本周' : i === 1 ? '上周' : `前${i}周`}</div>
-                    <div style="font-size: 12px; color: #999;">${weekStr}</div>
-                `;
-                card.onclick = () => selectWeek(card);
-                container.appendChild(card);
-            }
-        }
-        
-        function selectWeek(card) {
-            document.querySelectorAll('.week-card').forEach(c => c.classList.remove('active'));
-            card.classList.add('active');
-        }
-        
-        async function generateWeeklyReport() {
-            const selected = document.querySelector('.week-card.active');
-            if (!selected) {
-                alert('请先选择一周');
-                return;
-            }
-            
-            const startDate = selected.dataset.start;
-            const endDate = selected.dataset.end;
-            
-            try {
-                const token = await getToken();
-                const res = await fetch(`${FEISHU_API}/bitable/v1/apps/${CONFIG.baseId}/tables/${CONFIG.tableId}/records/search`, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        filter: {
-                            conjunction: 'and',
-                            conditions: [
-                                { field_name: '日期', operator: 'isGreaterThanOrEqual', value: [startDate] },
-                                { field_name: '日期', operator: 'isLessThanOrEqual', value: [endDate] }
-                            ]
-                        }
-                    })
+            categories = categories.filter(c => c.id !== id);
+            // Update existing logs to use first available category
+            Object.keys(dailyLogs).forEach(date => {
+                dailyLogs[date].forEach(task => {
+                    if (task.categoryId === id) {
+                        task.categoryId = categories[0].id;
+                    }
                 });
-                const data = await res.json();
-                const records = data.data?.items || [];
-                
-                if (records.length === 0) {
-                    document.getElementById('weeklyReport').innerHTML = '<div class="report-section"><p>该周暂无记录</p></div>';
-                    return;
-                }
-                
-                // 汇总数据
-                const summary = {};
-                let totalItems = 0;
-                let totalProgress = 0;
-                
-                records.forEach(record => {
-                    const items = JSON.parse(record.fields['工作项'] || '[]');
-                    items.forEach(item => {
-                        totalItems++;
-                        totalProgress += item.progress;
-                        if (!summary[item.category]) {
-                            summary[item.category] = { items: [], totalProgress: 0 };
-                        }
-                        summary[item.category].items.push(item);
-                        summary[item.category].totalProgress += item.progress;
+            });
+            
+            saveData();
+            renderCategories();
+            renderCategoryOptions();
+            renderModalCategoryList();
+            loadDateData();
+        }
+
+        // Report Generation
+        function generateWeeklyReport() {
+            const startOfWeek = new Date(selectedDate);
+            startOfWeek.setDate(selectedDate.getDate() - selectedDate.getDay());
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(startOfWeek.getDate() + 6);
+            
+            const weekData = collectDateRangeData(startOfWeek, endOfWeek);
+            const report = compileReport(weekData, '周');
+            
+            showReportModal(
+                '本周工作总结', 
+                `${formatDateKey(startOfWeek)} 至 ${formatDateKey(endOfWeek)}`,
+                report
+            );
+        }
+
+        function generateMonthlyReport() {
+            const startOfMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+            const endOfMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0);
+            
+            const monthData = collectDateRangeData(startOfMonth, endOfMonth);
+            const report = compileReport(monthData, '月');
+            
+            showReportModal(
+                '本月工作总结', 
+                `${selectedDate.getFullYear()}年${selectedDate.getMonth() + 1}月`,
+                report
+            );
+        }
+
+        function collectDateRangeData(startDate, endDate) {
+            const data = [];
+            const current = new Date(startDate);
+            
+            while (current <= endDate) {
+                const dateKey = formatDateKey(current);
+                if (dailyLogs[dateKey] && dailyLogs[dateKey].length > 0) {
+                    data.push({
+                        date: new Date(current),
+                        tasks: dailyLogs[dateKey]
                     });
+                }
+                current.setDate(current.getDate() + 1);
+            }
+            
+            return data;
+        }
+
+        function compileReport(data, type) {
+            if (data.length === 0) {
+                return '<p class="text-gray-500 text-center py-8">该时间段内暂无工作记录</p>';
+            }
+            
+            // Group by category
+            const byCategory = {};
+            const allContents = [];
+            
+            data.forEach(day => {
+                day.tasks.forEach(task => {
+                    const cat = categories.find(c => c.id === task.categoryId) || categories[0];
+                    if (!byCategory[cat.name]) {
+                        byCategory[cat.name] = {
+                            color: cat.color,
+                            items: []
+                        };
+                    }
+                    // Simple deduplication by content similarity
+                    const isDuplicate = allContents.some(existing => 
+                        similarity(existing, task.content) > 0.8
+                    );
+                    if (!isDuplicate) {
+                        byCategory[cat.name].items.push({
+                            content: task.content,
+                            date: day.date
+                        });
+                        allContents.push(task.content);
+                    }
                 });
-                
-                const avgProgress = Math.round(totalProgress / totalItems);
-                
-                // 生成报告HTML
-                let reportHTML = `
-                    <div class="report-section">
-                        <div class="ai-summary">
-                            <h3>🤖 AI 智能总结</h3>
-                            <p>本周共完成 ${totalItems} 项工作，平均完成度 ${avgProgress}%</p>
-                            <div class="summary-grid">
-                                <div class="summary-item">
-                                    <div class="summary-label">工作天数</div>
-                                    <div class="summary-value">${records.length} 天</div>
-                                </div>
-                                <div class="summary-item">
-                                    <div class="summary-label">工作项总数</div>
-                                    <div class="summary-value">${totalItems} 项</div>
-                                </div>
-                                <div class="summary-item">
-                                    <div class="summary-label">平均完成度</div>
-                                    <div class="summary-value">${avgProgress}%</div>
-                                </div>
-                                <div class="summary-item">
-                                    <div class="summary-label">工作类型</div>
-                                    <div class="summary-value">${Object.keys(summary).length} 类</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <h3 style="margin: 20px 0 15px;">工作类型分布</h3>
-                        <div class="distribution-bar">
-                            ${Object.entries(summary).map(([cat, data]) => {
-                                const percentage = (data.items.length / totalItems * 100).toFixed(1);
-                                return `<div class="distribution-segment" style="background: ${getCategoryColor(cat)}; width: ${percentage}%">${percentage > 10 ? getCategoryName(cat) : ''}</div>`;
-                            }).join('')}
-                        </div>
-                        <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 10px;">
-                            ${Object.entries(summary).map(([cat, data]) => `
-                                <div style="display: flex; align-items: center; gap: 5px;">
-                                    <div style="width: 12px; height: 12px; background: ${getCategoryColor(cat)}; border-radius: 2px;"></div>
-                                    <span style="font-size: 12px;">${getCategoryName(cat)} (${data.items.length}项)</span>
-                                </div>
+            });
+            
+            // Generate HTML
+            let html = '<div class="space-y-6">';
+            
+            Object.entries(byCategory).forEach(([catName, catData]) => {
+                html += `
+                    <div class="border-l-4 pl-4 py-1" style="border-color: ${catData.color}">
+                        <h4 class="font-bold text-gray-800 mb-3 flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full" style="background-color: ${catData.color}"></span>
+                            ${catName}
+                            <span class="text-xs font-normal text-gray-500">(${catData.items.length}项)</span>
+                        </h4>
+                        <ul class="space-y-2">
+                            ${catData.items.map(item => `
+                                <li class="text-gray-700 pl-2">
+                                    ${escapeHtml(item.content)}
+                                    <span class="text-xs text-gray-400 ml-2">(${item.date.getMonth() + 1}/${item.date.getDate()})</span>
+                                </li>
                             `).join('')}
-                        </div>
-                        
-                        <h3 style="margin: 20px 0 15px;">工作总结</h3>
-                        <div class="work-summary-list">
-                            ${Object.entries(summary).map(([cat, data]) => {
-                                const catAvg = Math.round(data.totalProgress / data.items.length);
-                                const mergedContent = mergeSimilarContent(data.items.map(i => i.content));
-                                return `
-                                    <div class="summary-category">
-                                        <div class="summary-category-header" style="background: ${getCategoryColor(cat)}" onclick="toggleCategory(this)">
-                                            <span>${getCategoryName(cat)} (${data.items.length}项)</span>
-                                            <span>平均完成度 ${catAvg}% ▼</span>
-                                        </div>
-                                        <div class="summary-category-content">
-                                            <div style="margin-bottom: 10px; font-weight: bold; color: #333;">${mergedContent}</div>
-                                            ${data.items.map(item => `
-                                                <div class="summary-item-text">
-                                                    ${item.content} (${item.progress}%)
-                                                </div>
-                                            `).join('')}
-                                        </div>
-                                    </div>
-                                `;
-                            }).join('')}
-                        </div>
+                        </ul>
                     </div>
                 `;
-                
-                document.getElementById('weeklyReport').innerHTML = reportHTML;
-            } catch (err) {
-                document.getElementById('weeklyReport').innerHTML = `<div class="report-section"><p>生成失败：${err.message}</p></div>`;
-            }
-        }
-        
-        // ============================================
-        // 月报功能
-        // ============================================
-        function generateMonthSelector() {
-            const container = document.getElementById('monthSelector');
-            const today = new Date();
+            });
             
-            for (let i = 5; i >= 0; i--) {
-                const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
-                const monthStr = `${date.getFullYear()}年${date.getMonth() + 1}月`;
-                
-                const card = document.createElement('div');
-                card.className = 'month-card';
-                card.dataset.year = date.getFullYear();
-                card.dataset.month = date.getMonth() + 1;
-                card.innerHTML = `
-                    <div>${i === 0 ? '本月' : i === 1 ? '上月' : monthStr}</div>
-                `;
-                card.onclick = () => selectMonth(card);
-                container.appendChild(card);
-            }
-        }
-        
-        function selectMonth(card) {
-            document.querySelectorAll('.month-card').forEach(c => c.classList.remove('active'));
-            card.classList.add('active');
-        }
-        
-        async function generateMonthlyReport() {
-            const selected = document.querySelector('.month-card.active');
-            if (!selected) {
-                alert('请先选择月份');
-                return;
-            }
+            html += '</div>';
             
-            const year = parseInt(selected.dataset.year);
-            const month = parseInt(selected.dataset.month);
-            const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
-            const endDate = `${year}-${String(month).padStart(2, '0')}-${new Date(year, month, 0).getDate()}`;
+            // Add summary
+            const totalDays = data.length;
+            const totalTasks = allContents.length;
+            html += `
+                <div class="mt-8 pt-6 border-t border-gray-200">
+                    <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg p-4">
+                        <h4 class="font-bold text-gray-800 mb-2">统计摘要</h4>
+                        <p class="text-sm text-gray-600">
+                            本${type}共记录 <strong>${totalDays}</strong> 天，完成各类工作 <strong>${totalTasks}</strong> 项，
+                            涉及 <strong>${Object.keys(byCategory).length}</strong> 个分类。
+                        </p>
+                    </div>
+                </div>
+            `;
             
-            try {
-                const token = await getToken();
-                const res = await fetch(`${FEISHU_API}/bitable/v1/apps/${CONFIG.baseId}/tables/${CONFIG.tableId}/records/search`, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        filter: {
-                            conjunction: 'and',
-                            conditions: [
-                                { field_name: '日期', operator: 'isGreaterThanOrEqual', value: [startDate] },
-                                { field_name: '日期', operator: 'isLessThanOrEqual', value: [endDate] }
-                            ]
-                        }
-                    })
-                });
-                const data = await res.json();
-                const records = data.data?.items || [];
-                
-                if (records.length === 0) {
-                    document.getElementById('monthlyReport').innerHTML = '<div class="report-section"><p>该月暂无记录</p></div>';
-                    return;
+            return html;
+        }
+
+        function similarity(s1, s2) {
+            // Simple Jaccard similarity for deduplication
+            const set1 = new Set(s1.split(''));
+            const set2 = new Set(s2.split(''));
+            const intersection = new Set([...set1].filter(x => set2.has(x)));
+            const union = new Set([...set1, ...set2]);
+            return intersection.size / union.size;
+        }
+
+        function showReportModal(title, subtitle, content) {
+            document.getElementById('reportTitle').textContent = title;
+            document.getElementById('reportSubtitle').textContent = subtitle;
+            document.getElementById('reportContent').innerHTML = content;
+            document.getElementById('reportModal').classList.remove('hidden');
+        }
+
+        function closeReportModal() {
+            document.getElementById('reportModal').classList.add('hidden');
+        }
+
+        function copyReport() {
+            const content = document.getElementById('reportContent').innerText;
+            navigator.clipboard.writeText(content).then(() => {
+                const btn = event.target.closest('button');
+                const original = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check"></i> 已复制';
+                setTimeout(() => btn.innerHTML = original, 2000);
+            });
+        }
+
+        function exportReport() {
+            const title = document.getElementById('reportTitle').textContent;
+            const subtitle = document.getElementById('reportSubtitle').textContent;
+            const content = document.getElementById('reportContent').innerText;
+            
+            const text = `${title}\n${subtitle}\n\n${content}`;
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `工作${title}_${subtitle.replace(/\s/g, '')}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Statistics
+        function updateStatistics() {
+            const currentMonth = selectedDate.getMonth();
+            const currentYear = selectedDate.getFullYear();
+            
+            let daysWithData = 0;
+            let totalTasks = 0;
+            
+            Object.keys(dailyLogs).forEach(dateKey => {
+                const date = new Date(dateKey);
+                if (date.getMonth() === currentMonth && date.getFullYear() === currentYear) {
+                    if (dailyLogs[dateKey].length > 0) {
+                        daysWithData++;
+                        totalTasks += dailyLogs[dateKey].length;
+                    }
                 }
-                
-                // 按周分组
-                const weeks = {};
-                let totalItems = 0;
-                let totalProgress = 0;
-                const summary = {};
-                
-                records.forEach(record => {
-                    const date = new Date(record.fields['日期']);
-                    const weekNum = Math.ceil(date.getDate() / 7);
-                    if (!weeks[weekNum]) weeks[weekNum] = [];
-                    weeks[weekNum].push(record);
-                    
-                    const items = JSON.parse(record.fields['工作项'] || '[]');
-                    items.forEach(item => {
-                        totalItems++;
-                        totalProgress += item.progress;
-                        if (!summary[item.category]) {
-                            summary[item.category] = { items: [], totalProgress: 0 };
-                        }
-                        summary[item.category].items.push(item);
-                        summary[item.category].totalProgress += item.progress;
-                    });
-                });
-                
-                const avgProgress = Math.round(totalProgress / totalItems);
-                
-                let reportHTML = `
-                    <div class="report-section">
-                        <div class="ai-summary">
-                            <h3>🤖 AI 智能总结</h3>
-                            <p>${year}年${month}月共完成 ${totalItems} 项工作，平均完成度 ${avgProgress}%</p>
-                            <div class="summary-grid">
-                                <div class="summary-item">
-                                    <div class="summary-label">工作天数</div>
-                                    <div class="summary-value">${records.length} 天</div>
-                                </div>
-                                <div class="summary-item">
-                                    <div class="summary-label">工作项总数</div>
-                                    <div class="summary-value">${totalItems} 项</div>
-                                </div>
-                                <div class="summary-item">
-                                    <div class="summary-label">平均完成度</div>
-                                    <div class="summary-value">${avgProgress}%</div>
-                                </div>
-                                <div class="summary-item">
-                                    <div class="summary-label">工作类型</div>
-                                    <div class="summary-value">${Object.keys(summary).length} 类</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <h3 style="margin: 20px 0 15px;">工作类型分布</h3>
-                        <div class="distribution-bar">
-                            ${Object.entries(summary).map(([cat, data]) => {
-                                const percentage = (data.items.length / totalItems * 100).toFixed(1);
-                                return `<div class="distribution-segment" style="background: ${getCategoryColor(cat)}; width: ${percentage}%">${percentage > 10 ? getCategoryName(cat) : ''}</div>`;
-                            }).join('')}
-                        </div>
-                        
-                        <h3 style="margin: 20px 0 15px;">工作总结</h3>
-                        <div class="work-summary-list">
-                            ${Object.entries(summary).map(([cat, data]) => {
-                                const catAvg = Math.round(data.totalProgress / data.items.length);
-                                const mergedContent = mergeSimilarContent(data.items.map(i => i.content));
-                                return `
-                                    <div class="summary-category">
-                                        <div class="summary-category-header" style="background: ${getCategoryColor(cat)}" onclick="toggleCategory(this)">
-                                            <span>${getCategoryName(cat)} (${data.items.length}项)</span>
-                                            <span>平均完成度 ${catAvg}% ▼</span>
-                                        </div>
-                                        <div class="summary-category-content">
-                                            <div style="margin-bottom: 10px; font-weight: bold; color: #333;">${mergedContent}</div>
-                                            ${data.items.map(item => `
-                                                <div class="summary-item-text">
-                                                    ${item.content} (${item.progress}%)
-                                                </div>
-                                            `).join('')}
-                                        </div>
-                                    </div>
-                                `;
-                            }).join('')}
-                        </div>
-                        
-                        <h3 style="margin: 20px 0 15px;">周度统计</h3>
-                        ${Object.entries(weeks).map(([week, records]) => {
-                            let weekItems = 0;
-                            let weekProgress = 0;
-                            records.forEach(r => {
-                                const items = JSON.parse(r.fields['工作项'] || '[]');
-                                weekItems += items.length;
-                                weekProgress += items.reduce((s, i) => s + i.progress, 0);
-                            });
-                            const weekAvg = weekItems > 0 ? Math.round(weekProgress / weekItems) : 0;
-                            return `
-                                <div style="padding: 10px; background: #f5f5f5; border-radius: 6px; margin-bottom: 10px;">
-                                    <strong>第${week}周</strong>：${records.length}天，${weekItems}项工作，平均完成度${weekAvg}%
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
-                `;
-                
-                document.getElementById('monthlyReport').innerHTML = reportHTML;
-            } catch (err) {
-                document.getElementById('monthlyReport').innerHTML = `<div class="report-section"><p>生成失败：${err.message}</p></div>`;
-            }
-        }
-        
-        // ============================================
-        // 工具函数
-        // ============================================
-        function switchTab(tab) {
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            });
             
-            event.target.classList.add('active');
-            document.getElementById(`tab-${tab}`).classList.add('active');
+            // Animate numbers
+            animateNumber('statDays', daysWithData);
+            animateNumber('statTasks', totalTasks);
+            animateNumber('statCategories', categories.length);
         }
+
+        function animateNumber(id, target) {
+            const el = document.getElementById(id);
+            const current = parseInt(el.textContent);
+            const diff = target - current;
+            if (diff === 0) return;
+            
+            const steps = 20;
+            const stepValue = diff / steps;
+            let step = 0;
+            
+            const timer = setInterval(() => {
+                step++;
+                el.textContent = Math.round(current + stepValue * step);
+                if (step >= steps) {
+                    el.textContent = target;
+                    clearInterval(timer);
+                }
+            }, 20);
+        }
+
+        // Utilities
+        function saveData() {
+            localStorage.setItem('workCategories', JSON.stringify(categories));
+            localStorage.setItem('workDailyLogs', JSON.stringify(dailyLogs));
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Close modals on backdrop click
+        document.getElementById('categoryModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeCategoryModal();
+        });
         
-        function showStatus(msg, type, prefix) {
-            const status = document.getElementById(`${prefix}Status`);
-            status.textContent = msg;
-            status.className = `status ${type}`;
-            if (type !== 'loading') setTimeout(() => status.style.display = 'none', 3000);
-        }
-        
-        function toggleCategory(header) {
-            const content = header.nextElementSibling;
-            content.style.display = content.style.display === 'none' ? 'block' : 'none';
-            header.querySelector('span:last-child').textContent = 
-                content.style.display === 'none' ? '展开 ▶' : header.querySelector('span:last-child').textContent.replace('▶', '▼');
-        }
-        
-        function mergeSimilarContent(items) {
-            // 简单的合并逻辑：提取共同关键词
-            if (items.length === 1) return items[0];
-            if (items.length <= 3) return `完成${items.length}项相关工作`;
-            return `完成${items.length}项工作`;
-        }
+        document.getElementById('reportModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeReportModal();
+        });
     </script>
 </body>
 </html>
