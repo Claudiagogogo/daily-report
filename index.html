@@ -408,10 +408,10 @@
         let currentDate = new Date();
         let selectedDate = new Date();
         let categories = JSON.parse(localStorage.getItem('workCategories')) || [
-            { id: 1, name: '项目开发', color: '#3b82f6' },
-            { id: 2, name: '会议沟通', color: '#10b981' },
-            { id: 3, name: '文档编写', color: '#f59e0b' },
-            { id: 4, name: '学习提升', color: '#8b5cf6' },
+            { id: 1, name: '绩效考核', color: '#3b82f6' },
+            { id: 2, name: '经营分析', color: '#10b981' },
+            { id: 3, name: '协同及费用管理', color: '#f59e0b' },
+            { id: 4, name: '数据体系建设', color: '#8b5cf6' },
             { id: 5, name: '其他事务', color: '#6b7280' }
         ];
         let dailyLogs = JSON.parse(localStorage.getItem('workDailyLogs')) || {};
@@ -958,3 +958,4 @@
     </script>
 </body>
 </html>
+
